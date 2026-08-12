@@ -1,0 +1,158 @@
+{
+	"FileVersion": 3,
+	"Version": 17675,
+	"VersionName": "dev-17675",
+	"FriendlyName": "Voxel Plugin",
+	"Description": "State-of-the-art voxel technology for Unreal Engine",
+	"Category": "Landscape",
+	"CreatedBy": "voxelplugin.com",
+	"CreatedByURL": "https://voxelplugin.com",
+	"DocsURL": "https://docs.voxelplugin.com",
+	"MarketplaceURL": "",
+	"SupportURL": "https://discord.voxelplugin.com",
+	"EngineVersion": "5.7.0",
+	"CanContainContent": true,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "VoxelCore",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit",
+			"PlatformAllowList": [
+				"Win64",
+				"Linux",
+				"Mac",
+				"Android",
+				"IOS"
+			]
+		},
+		{
+			"Name": "VoxelCoreEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64",
+				"Linux",
+				"Mac",
+				"Android",
+				"IOS"
+			]
+		},
+		{
+			"Name": "VoxelGraph",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64",
+				"Linux",
+				"Mac",
+				"Android",
+				"IOS"
+			]
+		},
+		{
+			"Name": "VoxelGraphEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64",
+				"Linux",
+				"Mac",
+				"Android",
+				"IOS"
+			]
+		},
+		{
+			"Name": "Voxel",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit",
+			"PlatformAllowList": [
+				"Win64",
+				"Linux",
+				"Mac",
+				"Android",
+				"IOS"
+			]
+		},
+		{
+			"Name": "VoxelEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64",
+				"Linux",
+				"Mac",
+				"Android",
+				"IOS"
+			]
+		},
+		{
+			"Name": "VoxelBlueprint",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "PostConfigInit",
+			"PlatformAllowList": [
+				"Win64",
+				"Linux",
+				"Mac",
+				"Android",
+				"IOS"
+			]
+		},
+		{
+			"Name": "VoxelBlueprintEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64",
+				"Linux",
+				"Mac",
+				"Android",
+				"IOS"
+			]
+		},
+		{
+			"Name": "VoxelTests",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64",
+				"Linux",
+				"Mac",
+				"Android",
+				"IOS"
+			]
+		},
+		{
+			"Name": "VoxelPCG",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64",
+				"Linux",
+				"Mac",
+				"Android",
+				"IOS"
+			]
+		},
+		{
+			"Name": "VoxelPCGEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64",
+				"Linux",
+				"Mac",
+				"Android",
+				"IOS"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "PCG",
+			"Enabled": true
+		}
+	],
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false
+}

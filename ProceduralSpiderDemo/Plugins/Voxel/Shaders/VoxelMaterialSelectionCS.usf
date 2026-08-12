@@ -1,0 +1,231 @@
+// Copyright Voxel Plugin SAS, 2026. All Rights Reserved.
+
+#include "Common.ush"
+#include "/Engine/Generated/Material.ush"
+#include "VoxelDisplacement.ush"
+#include "/Engine/Private/Nanite/NaniteVertexFactory.ush"
+
+#if INTELLISENSE_PARSER
+struct
+{
+	DECLARE_SCALAR_ARRAY(uint, RenderIndexToShadingBin, 128);
+	Texture2D<UlongType> VisBuffer64;
+	RWTexture2D<uint> ShadingMask;
+	uint UniqueId;
+} MaterialSelectionParameters;
+
+#define USES_DISPLACEMENT 1
+#define IS_VOXEL_MEGA_MATERIAL 1
+#endif
+
+[numthreads(8, 8, 1)]
+void Main(const uint2 DispatchThreadId : SV_DispatchThreadID)
+{
+	FNaniteView NaniteView = GetNaniteView(0);
+	ResolvedView = ResolveView();
+
+	if (any(DispatchThreadId > NaniteView.ViewSizeAndInvSize.xy))
+	{
+		return;
+	}
+
+	const UlongType VisPixel = MaterialSelectionParameters.VisBuffer64[DispatchThreadId];
+
+	uint DepthInt = 0;
+	uint VisibleClusterIndex = 0;
+	uint TriIndex = 0;
+	UnpackVisPixel(VisPixel, DepthInt, VisibleClusterIndex, TriIndex);
+
+	BRANCH
+	if (VisibleClusterIndex == 0xFFFFFFFF)
+	{
+		return;
+	}
+
+	FShadingMask UnpackedMask = UnpackShadingMask(MaterialSelectionParameters.ShadingMask[DispatchThreadId]);
+
+	BRANCH
+	if (!UnpackedMask.bIsNanitePixel)
+	{
+		return;
+	}
+
+	const FVisibleCluster VisibleCluster = GetVisibleCluster(VisibleClusterIndex);
+	const FCluster Cluster = GetCluster(VisibleCluster.PageIndex, VisibleCluster.ClusterIndex);
+
+	BRANCH
+	if (GetExtendedDataNum(Cluster, VisibleCluster.ClusterIndex) == 0)
+	{
+		return;
+	}
+
+	BRANCH
+	if (!IsVoxelCluster(Cluster, VisibleCluster.ClusterIndex, MaterialSelectionParameters.UniqueId))
+	{
+		return;
+	}
+
+	const uint3 TriIndices = DecodeTriangleIndices(Cluster, TriIndex);
+
+	FPrimitiveSceneData PrimitiveData;
+	FInstanceSceneData InstanceData;
+	GetNaniteMaterialSceneData(VisibleCluster, PrimitiveData, InstanceData);
+
+	FInstanceDynamicData InstanceDynamicData = CalculateInstanceDynamicData(NaniteView, InstanceData);
+
+	const FNaniteVertTransforms Transforms = CalculateNaniteVertexTransforms(
+		InstanceData,
+		InstanceDynamicData,
+		NaniteView);
+
+#if VOXEL_ENGINE_VERSION < 506
+	const FNaniteTransformedTri Tri = FetchTransformedNaniteTriangle(
+		PrimitiveData,
+		InstanceData,
+		Transforms,
+		Cluster,
+		TriIndices, false);
+#elif VOXEL_ENGINE_VERSION < 507
+	const FNaniteTransformedTri Tri = FetchTransformedNaniteTriangle(
+		NaniteView,
+		PrimitiveData,
+		InstanceData,
+		GetInstanceViewData(InstanceData.InstanceId, NaniteView.SceneRendererPrimaryViewId),
+		Transforms,
+		Cluster,
+		VisibleCluster,
+		TriIndices,
+		false);
+#else
+	FReconstructedVoxelData VoxelData = (FReconstructedVoxelData)0;
+
+	FNaniteTransformedVert Verts[3];
+	FetchTransformedNaniteVerts<3>(
+		NaniteView,
+		PrimitiveData,
+		InstanceData,
+		GetInstanceViewData(InstanceData.InstanceId, NaniteView.SceneRendererPrimaryViewId),
+		Transforms,
+		Cluster,
+		VisibleCluster,
+		TriIndices,
+		VoxelData,
+		false,
+		Verts);
+#endif
+
+	const float4 SvPosition = float4(
+		(DispatchThreadId + 0.5) + NaniteView.ViewRect.xy,
+		asfloat(DepthInt),
+		1.f);
+
+#if USES_DISPLACEMENT
+	float4x4 TranslatedWorldToLocal = DFFastToTranslatedWorld(InstanceData.WorldToLocal, NaniteView.PreViewTranslation);
+
+	float4 PixelTranslatedWorld = mul(SvPosition, NaniteView.SVPositionToTranslatedWorld);
+	float4 PixelTranslatedWorld_dx = mul(float4(1, 0, 0, 0), NaniteView.SVPositionToTranslatedWorld);
+	float4 PixelTranslatedWorld_dy = mul(float4(0, 1, 0, 0), NaniteView.SVPositionToTranslatedWorld);
+
+	float4 PixelLocal = mul(PixelTranslatedWorld, TranslatedWorldToLocal);
+	float4 PixelLocal_dx = mul(PixelTranslatedWorld_dx, TranslatedWorldToLocal);
+	float4 PixelLocal_dy = mul(PixelTranslatedWorld_dy, TranslatedWorldToLocal);
+
+	float3 CameraLocal = TranslatedWorldToLocal[3].xyz;
+
+	const FBarycentrics Barycentrics = CalculateTriangleBarycentrics(
+		CameraLocal,
+		PixelLocal.xyz / PixelLocal.w,
+		(PixelLocal.xyz + PixelLocal_dx.xyz) / PixelLocal.w,
+		(PixelLocal.xyz + PixelLocal_dy.xyz) / PixelLocal.w,
+		UE_507_SWITCH(Tri.,)Verts[0].PointPostDeform,
+		UE_507_SWITCH(Tri.,)Verts[1].PointPostDeform,
+		UE_507_SWITCH(Tri.,)Verts[2].PointPostDeform,
+		UE_507_SWITCH(Tri.,)Verts[0].TangentBasis.TangentZ,
+		UE_507_SWITCH(Tri.,)Verts[1].TangentBasis.TangentZ,
+		UE_507_SWITCH(Tri.,)Verts[2].TangentBasis.TangentZ);
+#else
+	const float2 PixelClip = (SvPosition.xy - NaniteView.ViewRect.xy) * NaniteView.ViewSizeAndInvSize.zw * float2(2, -2) + float2(-1, 1);
+
+	const FBarycentrics Barycentrics = CalculateTriangleBarycentrics(
+		PixelClip,
+		UE_507_SWITCH(Tri.,)Verts[0].PointClip,
+		UE_507_SWITCH(Tri.,)Verts[1].PointClip,
+		UE_507_SWITCH(Tri.,)Verts[2].PointClip,
+		NaniteView.ViewSizeAndInvSize.zw);
+#endif
+
+	uint Layer = 0;
+#if IS_VOXEL_MEGA_MATERIAL
+	{
+		FVertexFactoryInterpolantsVSToPS Interpolants = (FVertexFactoryInterpolantsVSToPS)0;
+
+#if VOXEL_ENGINE_VERSION >= 507
+		FMaterialPixelParameters Parameters = FetchNaniteMaterialPixelParameters<3>(
+			PrimitiveData,
+			InstanceData,
+			InstanceDynamicData,
+			Transforms,
+			NaniteView,
+			Verts,
+			Cluster,
+			Barycentrics,
+			Interpolants,
+			SvPosition);
+#else
+		FMaterialPixelParameters Parameters = FetchNaniteMaterialPixelParameters(
+			PrimitiveData,
+			InstanceData,
+			InstanceDynamicData,
+			NaniteView,
+			Tri,
+			Cluster,
+			Barycentrics,
+			Interpolants,
+			SvPosition);
+#endif
+
+#if MATERIAL_PIXEL_PARAMETERS_VOXEL_VERSION == 8
+		Parameters.Voxel_PageIndex = VisibleCluster.PageIndex;
+		Parameters.Voxel_ClusterIndex = VisibleCluster.ClusterIndex;
+		Parameters.Voxel_TriIndices = TriIndices;
+		Parameters.Voxel_Barycentrics = Barycentrics.Value;
+#endif
+
+		FPixelMaterialInputs PixelMaterialInputs;
+
+		CalcMaterialParametersEx(
+			Parameters,
+			PixelMaterialInputs,
+			SvPosition,
+			Parameters.ScreenPosition,
+			true,
+			Parameters.WorldPosition_CamRelative,
+			Parameters.WorldPosition_NoOffsets_CamRelative);
+
+#if MATERIAL_PIXEL_PARAMETERS_VOXEL_VERSION == 8
+		Layer = Parameters.Voxel_LayerIndex;
+#endif
+	}
+#endif
+
+	if (Layer < 0 || Layer > 127)
+	{
+		Layer = 0;
+	}
+
+	uint ShadingBin = GET_SCALAR_ARRAY_ELEMENT(MaterialSelectionParameters.RenderIndexToShadingBin, Layer);
+
+	// Make sure to assign a valid ShadingBin
+	if (ShadingBin == -1)
+	{
+		ShadingBin = GET_SCALAR_ARRAY_ELEMENT(MaterialSelectionParameters.RenderIndexToShadingBin, 0);
+
+		if (ShadingBin == -1)
+		{
+			return;
+		}
+	}
+
+	UnpackedMask.ShadingBin = ShadingBin;
+	MaterialSelectionParameters.ShadingMask[DispatchThreadId] = PackShadingMask(UnpackedMask);
+}

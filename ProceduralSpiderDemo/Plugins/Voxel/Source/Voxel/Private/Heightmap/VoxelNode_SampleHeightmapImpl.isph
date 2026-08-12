@@ -1,0 +1,55 @@
+// Copyright Voxel Plugin SAS, 2026. All Rights Reserved.
+
+// ReSharper disable CppCStyleCast
+// ReSharper disable CppVariableCanBeMadeConstexpr
+// ReSharper disable CppUE4CodingStandardNamingViolationWarning
+
+#include "VoxelMinimal.isph"
+#include "VoxelSampleHeightmap.isph"
+
+export void PREPROCESSOR_JOIN(VoxelNode_SampleHeightmap_, Type)(
+	const uniform float PositionX[],
+	const uniform float PositionY[],
+	uniform float OutHeight[],
+	const uniform int32 Num,
+	const uniform bool bUseBicubic,
+	const uniform float ScaleZ,
+	const uniform float OffsetZ,
+	const uniform float ScaleXY,
+	const uniform int32 SizeX,
+	const uniform int32 SizeY,
+	const uniform Type Heightmap[])
+{
+	const uniform float SizeXMinus2 = SizeX - 2.0001f;
+	const uniform float SizeYMinus2 = SizeY - 2.0001f;
+
+	const uniform float InvScaleXY = 1.f / ScaleXY;
+	const uniform float2 Offset = MakeFloat2(SizeX, SizeY) / 2.f;
+
+	FOREACH(Index, 0, Num)
+	{
+		const varying float2 Position = MakeFloat2(PositionX[Index], PositionY[Index]) * InvScaleXY + Offset;
+
+		coherent_if (
+			Position.x < 1.f ||
+			Position.y < 1.f ||
+			Position.x > SizeXMinus2 ||
+			Position.y > SizeYMinus2)
+		{
+			OutHeight[Index] = NaNf;
+			continue;
+		}
+
+		const varying float NewHeight = SampleHeightmap(
+			bUseBicubic,
+			SizeX,
+			SizeY,
+			Heightmap,
+			Position);
+
+		OutHeight[Index] = select(
+			isnan(NewHeight),
+			NaNf,
+			NewHeight * ScaleZ + OffsetZ);
+	}
+}

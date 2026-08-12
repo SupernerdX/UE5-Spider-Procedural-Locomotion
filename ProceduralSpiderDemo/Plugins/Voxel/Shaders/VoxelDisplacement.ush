@@ -1,0 +1,752 @@
+// Copyright Voxel Plugin SAS, 2026. All Rights Reserved.
+
+#pragma once
+
+#include "Common.ush"
+#include "/Engine/Private/Nanite/NaniteDataDecode.ush"
+
+#if INTELLISENSE_PARSER
+#define IS_NANITE_PASS 1
+#define VOXEL_MATERIAL_SELECTION 1
+#define MATERIAL_PIXEL_PARAMETERS_VOXEL_VERSION 8
+#define MATERIAL_VERTEX_PARAMETERS_VOXEL_VERSION 6
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+uint GetExtendedDataOffset(
+	const FCluster Cluster,
+	const uint ClusterIndex)
+{
+#if VOXEL_ENGINE_VERSION < 506
+	FPageHeader Header = GetPageHeader(ClusterPageData, Cluster.PageBaseAddress);
+	const uint ClusterSOAStride = (Header.NumClusters << 4);
+	const uint ClusterBaseAddress = Cluster.PageBaseAddress + (ClusterIndex << 4);
+	uint4 ClusterData = ClusterPageData.Load4(ClusterBaseAddress + 6 * ClusterSOAStride + NANITE_GPU_PAGE_HEADER_SIZE);
+
+	return BitFieldExtractU32(ClusterData.x, 22,  0);
+#else
+	return Cluster.ExtendedDataOffset;
+#endif
+}
+
+uint GetExtendedDataNum(
+	const FCluster Cluster,
+	const uint ClusterIndex)
+{
+#if VOXEL_ENGINE_VERSION < 506
+	FPageHeader Header = GetPageHeader(ClusterPageData, Cluster.PageBaseAddress);
+	const uint ClusterSOAStride = (Header.NumClusters << 4);
+	const uint ClusterBaseAddress = Cluster.PageBaseAddress + (ClusterIndex << 4);
+	uint4 ClusterData = ClusterPageData.Load4(ClusterBaseAddress + 6 * ClusterSOAStride + NANITE_GPU_PAGE_HEADER_SIZE);
+
+	return BitFieldExtractU32(ClusterData.x, 10, 22);
+#else
+	return Cluster.ExtendedDataNum;
+#endif
+}
+
+// ExtendedData:
+// 4 bytes: Magic Number + Mesh Index
+// 4 bytes: Chunk Indices Index
+// 6 bits: Size of Mesh Vertices Compression
+// ...: Mesh Vertices
+
+int GetVertexIndexInVoxelChunk(
+	const FCluster Cluster,
+	const uint ClusterIndex,
+	const int VertexIndexInCluster)
+{
+	const uint MeshVerticesAddress = Cluster.PageBaseAddress + GetExtendedDataOffset(Cluster, ClusterIndex) + 8;
+	const uint StartData = ClusterPageData.Load(MeshVerticesAddress);
+	const uint SizeOfIndex = BitFieldExtractU32(StartData, 6, 0);
+
+	FBitStreamReaderState BitStreamReader = BitStreamReader_Create_Aligned(MeshVerticesAddress, 6 + SizeOfIndex * VertexIndexInCluster, SizeOfIndex);
+	return asint(BitStreamReader_Read_RO(ClusterPageData, BitStreamReader, SizeOfIndex, SizeOfIndex));
+}
+
+int GetChunkIndicesIndexInCluster(
+	const FCluster Cluster,
+	const uint ClusterIndex)
+{
+	const uint ChunkIndicesIndex = ClusterPageData.Load(Cluster.PageBaseAddress + GetExtendedDataOffset(Cluster, ClusterIndex) + 4);
+	return asint(ChunkIndicesIndex);
+}
+
+bool IsVoxelCluster(
+	const FCluster Cluster,
+	const uint ClusterIndex,
+	uint UniqueId)
+{
+	const uint ClusterUniqueId = ClusterPageData.Load(Cluster.PageBaseAddress + GetExtendedDataOffset(Cluster, ClusterIndex));
+	return ClusterUniqueId == UniqueId;
+}
+
+uint GetVoxelAttributeOffset(
+	const uint ChunkIndicesIndex,
+	const Texture2D ChunkIndices_Texture,
+	const uint ChunkIndices_TextureSizeLog2,
+	const uint AttributeIndex)
+{
+#if MATERIAL_PIXEL_PARAMETERS_VOXEL_VERSION == 8
+	return asint(ChunkIndices_Texture[GetTextureIndex_Log2(ChunkIndicesIndex + AttributeIndex, ChunkIndices_TextureSizeLog2)].r);
+#else
+	return -1;
+#endif
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+void VoxelLayerMask_Set(
+	inout uint4 LayerMask,
+	uint Layer)
+{
+	const uint WordIndex = Layer >> 5;
+	const uint Mask = 1u << (Layer & 31);
+
+#if FEATURE_LEVEL >= FEATURE_LEVEL_SM6
+	LayerMask[WordIndex] |= Mask;
+#else
+	LayerMask.r |= WordIndex == 0 ? Mask : 0u;
+	LayerMask.g |= WordIndex == 1 ? Mask : 0u;
+	LayerMask.b |= WordIndex == 2 ? Mask : 0u;
+	LayerMask.a |= WordIndex == 3 ? Mask : 0u;
+#endif
+}
+
+bool VoxelLayerMask_Get(
+	const uint4 LayerMask,
+	uint Layer)
+{
+	return (LayerMask[Layer >> 5] & (1u << (Layer & 31))) != 0;
+}
+
+uint VoxelLayerMask_GetLayerIndex(
+	const uint4 LayerMask,
+	const uint Layer)
+{
+	uint LayerIndex = 0;
+
+	FLATTEN
+	if (Layer > 32)
+	{
+		LayerIndex += countbits(LayerMask[0]);
+	}
+	FLATTEN
+	if (Layer > 64)
+	{
+		LayerIndex += countbits(LayerMask[1]);
+	}
+	FLATTEN
+	if (Layer > 96)
+	{
+		LayerIndex += countbits(LayerMask[2]);
+	}
+
+	LayerIndex += countbits(LayerMask[Layer >> 5] & ((1u << (Layer & 31u)) - 1));
+
+	return LayerIndex;
+}
+
+void VoxelLayerMask_GetLayers(
+	const uint4 LayerMask,
+	out uint OutLayers[8])
+{
+	UNROLL
+	for (uint Index = 0; Index < 8; Index++)
+	{
+		OutLayers[Index] = 0;
+	}
+
+	uint NumLayers = 0;
+
+	UNROLL
+	for (uint WordIndex = 0; WordIndex < 4; WordIndex++)
+	{
+		uint Mask = LayerMask[WordIndex];
+		while (Mask != 0)
+		{
+			const uint BitIndex = firstbitlow(Mask);
+			Mask ^= (1u << BitIndex);
+			OutLayers[NumLayers++] = 32 * WordIndex + BitIndex;
+		}
+	}
+}
+
+uint VoxelLayerMask_GetLayer(
+	const uint4 LayerMask,
+	uint LayerIndex,
+	const uint MaxLayers_Constant)
+{
+	const uint Count0 = countbits(LayerMask.x);
+	const uint Count1 = countbits(LayerMask.y);
+	const uint Count2 = countbits(LayerMask.z);
+
+	uint Word = LayerMask.x;
+	uint WordOffset = 0;
+
+	FLATTEN
+	if (Count0 <= LayerIndex)
+	{
+		LayerIndex -= Count0;
+
+		Word = LayerMask.y;
+		WordOffset = 32;
+
+		FLATTEN
+		if (Count1 <= LayerIndex)
+		{
+			LayerIndex -= Count1;
+
+			Word = LayerMask.z;
+			WordOffset = 64;
+
+			FLATTEN
+			if (Count2 <= LayerIndex)
+			{
+				LayerIndex -= Count2;
+
+				Word = LayerMask.w;
+				WordOffset = 96;
+			}
+		}
+	}
+
+	for (uint Index = 0; Index < MaxLayers_Constant; Index++)
+	{
+		const uint BitIndex = firstbitlow(Word);
+
+		if (LayerIndex == 0)
+		{
+			return WordOffset + BitIndex;
+		}
+
+		LayerIndex--;
+		Word ^= (1u << BitIndex);
+	}
+
+	return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+void UnpackVoxelMaterial(
+	const uint4 Material,
+	out uint4 OutLayerMask,
+	out float Alphas[8])
+{
+	OutLayerMask = 0;
+
+	VoxelLayerMask_Set(OutLayerMask, (Material[0] >> 0) & 0xFF);
+	VoxelLayerMask_Set(OutLayerMask, (Material[0] >> 8) & 0xFF);
+	VoxelLayerMask_Set(OutLayerMask, (Material[0] >> 16) & 0xFF);
+	VoxelLayerMask_Set(OutLayerMask, (Material[0] >> 24) & 0xFF);
+	VoxelLayerMask_Set(OutLayerMask, (Material[1] >> 0) & 0xFF);
+	VoxelLayerMask_Set(OutLayerMask, (Material[1] >> 8) & 0xFF);
+	VoxelLayerMask_Set(OutLayerMask, (Material[1] >> 16) & 0xFF);
+	VoxelLayerMask_Set(OutLayerMask, (Material[1] >> 24) & 0xFF);
+
+	Alphas[0] = ByteToFloat((Material[2] >> 0) & 0xFF);
+	Alphas[1] = ByteToFloat((Material[2] >> 8) & 0xFF);
+	Alphas[2] = ByteToFloat((Material[2] >> 16) & 0xFF);
+	Alphas[3] = ByteToFloat((Material[2] >> 24) & 0xFF);
+	Alphas[4] = ByteToFloat((Material[3] >> 0) & 0xFF);
+	Alphas[5] = ByteToFloat((Material[3] >> 8) & 0xFF);
+	Alphas[6] = ByteToFloat((Material[3] >> 16) & 0xFF);
+	Alphas[7] = ByteToFloat((Material[3] >> 24) & 0xFF);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+// Will return 255 if LayerIndex >= 8
+void GetVoxelMaterialLayer_Safe(
+	const uint4 Material,
+	const uint LayerIndex,
+	out uint OutLayer,
+	out uint OutAlpha)
+{
+	const uint LayerWord =
+		LayerIndex < 4
+		? Material[0]
+		: LayerIndex < 8
+		? Material[1]
+		: 0xFFFFFFFF;
+
+	const uint AlphaWord =
+		LayerIndex < 4
+		? Material[2]
+		: Material[3];
+
+	const uint ByteIndex = LayerIndex & 0x3;
+
+	OutLayer = (LayerWord >> (8 * ByteIndex)) & 0xFF;
+	OutAlpha = (AlphaWord >> (8 * ByteIndex)) & 0xFF;
+}
+
+void GetVoxelMaterialLayers(
+	const float3 Barycentrics,
+	const uint4 MaterialU,
+	const uint4 MaterialV,
+	const uint4 MaterialW,
+	out uint4 OutLayerMask,
+	out float OutAlphas[8])
+{
+	// Sum of barycentrics is 1, so sum of barycentrics times this times alphas (max 255) is at most 65535 * 255 < 2**24
+	const float FloatToInt = 65535; // 2**16 - 1
+
+	// 16 is not enough for the worst case (3 * 8), but should cover nearly all cases
+	// If we go out of bounds indices with high alphas might be fully dropped though
+	uint PackedLayers[16];
+	uint NumLayers = 0;
+	{
+		const uint3 Barycentrics_int = Barycentrics * FloatToInt;
+
+		// TODO
+		const float CullAlpha = 0.01f;
+		const uint CullAlpha_int = CullAlpha * FloatToInt;
+
+		uint IndexU = 0;
+		uint IndexV = 0;
+		uint IndexW = 0;
+		while (NumLayers < 16)
+		{
+			uint LayerU;
+			uint LayerV;
+			uint LayerW;
+			uint AlphaU;
+			uint AlphaV;
+			uint AlphaW;
+			GetVoxelMaterialLayer_Safe(MaterialU, IndexU, LayerU, AlphaU);
+			GetVoxelMaterialLayer_Safe(MaterialV, IndexV, LayerV, AlphaV);
+			GetVoxelMaterialLayer_Safe(MaterialW, IndexW, LayerW, AlphaW);
+
+			const uint MinLayer = min3(LayerU, LayerV, LayerW);
+
+			uint Alpha = 0;
+
+			FLATTEN
+			if (MinLayer == 255)
+			{
+				// We've reached the end of the 3 material blends
+				break;
+			}
+
+			FLATTEN
+			if (LayerU == MinLayer)
+			{
+				Alpha += AlphaU * Barycentrics_int[0];
+				IndexU++;
+			}
+			FLATTEN
+			if (LayerV == MinLayer)
+			{
+				Alpha += AlphaV * Barycentrics_int[1];
+				IndexV++;
+			}
+			FLATTEN
+			if (LayerW == MinLayer)
+			{
+				Alpha += AlphaW * Barycentrics_int[2];
+				IndexW++;
+			}
+
+			// Be extra safe and ensure we don't go beyond the first 24 bits
+			Alpha = min(Alpha, 16777215);
+
+			FLATTEN
+			if (Alpha < CullAlpha_int)
+			{
+				continue;
+			}
+
+			PackedLayers[NumLayers++] = (Alpha << 8) | MinLayer;
+		}
+	}
+
+	// Sort by alpha first, picking the top 8 layers
+
+	BRANCH
+	if (NumLayers > 8)
+	{
+		// Write 0xFF so it gets sorted last in both weight (high to low) & layer (low to high)
+		UNROLL
+		for (uint Index = 9; Index < 16; Index++)
+		{
+			FLATTEN
+			if (Index >= NumLayers)
+			{
+				PackedLayers[Index] = 0xFF;
+			}
+		}
+
+		// See https://bertdobbelaere.github.io/sorting_networks_extended.html
+
+#define SWAP(A, B) \
+		FLATTEN \
+		if (PackedLayers[A] < PackedLayers[B]) \
+		{ \
+			const uint Temp = PackedLayers[A]; \
+			PackedLayers[A] = PackedLayers[B]; \
+			PackedLayers[B] = Temp; \
+		}
+
+		SWAP(0, 13); SWAP(1, 12); SWAP(2, 15); SWAP(3, 14); SWAP(4, 8); SWAP(5, 6); SWAP(7, 11); SWAP(9, 10);
+		SWAP(0, 5); SWAP(1, 7); SWAP(2, 9); SWAP(3, 4); SWAP(6, 13); SWAP(8, 14); SWAP(10, 15); SWAP(11, 12);
+		SWAP(0, 1); SWAP(2, 3); SWAP(4, 5); SWAP(6, 8); SWAP(7, 9); SWAP(10, 11); SWAP(12, 13); SWAP(14, 15);
+		SWAP(0, 2); SWAP(1, 3); SWAP(4, 10); SWAP(5, 11); SWAP(6, 7); SWAP(8, 9); SWAP(12, 14); SWAP(13, 15);
+		SWAP(1, 2); SWAP(3, 12); SWAP(4, 6); SWAP(5, 7); SWAP(8, 10); SWAP(9, 11); SWAP(13, 14);
+		SWAP(1, 4); SWAP(2, 6); SWAP(5, 8); SWAP(7, 10); SWAP(9, 13); SWAP(11, 14);
+		SWAP(2, 4); SWAP(3, 6); SWAP(9, 12); SWAP(11, 13);
+		SWAP(3, 5); SWAP(6, 8); SWAP(7, 9); SWAP(10, 12);
+		SWAP(3, 4); SWAP(5, 6); SWAP(7, 8); SWAP(9, 10); SWAP(11, 12);
+		SWAP(6, 7); SWAP(8, 9);
+
+#undef SWAP
+	}
+	else
+	{
+		// Always write up to 8 as we will get the topmost 8 layers
+		// Write 0xFF so it gets sorted last
+		UNROLL
+		for (uint Index = 0; Index < 8; Index++)
+		{
+			FLATTEN
+			if (Index >= NumLayers)
+			{
+				PackedLayers[Index] = 0xFF;
+			}
+		}
+	}
+
+	// Invert the encoding
+	{
+		UNROLL
+		for (uint Index = 0; Index < 8; Index++)
+		{
+			PackedLayers[Index] = (PackedLayers[Index] >> 8) | (PackedLayers[Index] << 24);
+		}
+	}
+
+	// Sort by layer
+	{
+#define SWAP(A, B) \
+	FLATTEN \
+	if (PackedLayers[A] > PackedLayers[B]) \
+	{ \
+		const uint Temp = PackedLayers[A]; \
+		PackedLayers[A] = PackedLayers[B]; \
+		PackedLayers[B] = Temp; \
+	}
+
+		SWAP(0, 2); SWAP(1, 3); SWAP(4, 6); SWAP(5, 7);
+		SWAP(0, 4); SWAP(1, 5); SWAP(2, 6); SWAP(3, 7);
+		SWAP(0, 1); SWAP(2, 3); SWAP(4, 5); SWAP(6, 7);
+		SWAP(2, 4); SWAP(3, 5);
+		SWAP(1, 4); SWAP(3, 6);
+		SWAP(1, 2); SWAP(3, 4); SWAP(5, 6);
+
+#undef SWAP
+	}
+
+	OutLayerMask = 0;
+
+	UNROLL
+	for (uint Index = 0; Index < 8; Index++)
+	{
+		const uint Alpha = PackedLayers[Index] & 0xFFFFFF;
+
+		OutAlphas[Index] = Alpha;
+
+		FLATTEN
+		if (Alpha == 0)
+		{
+			// Padding layer, skip
+			continue;
+		}
+
+		VoxelLayerMask_Set(
+			OutLayerMask,
+			PackedLayers[Index] >> 24);
+	}
+
+	// Normalize alphas
+	{
+		float Sum = 0;
+		{
+			UNROLL
+			for (uint Index = 0; Index < 8; Index++)
+			{
+				Sum += OutAlphas[Index];
+			}
+		}
+
+		FLATTEN
+		if (Sum == 0)
+		{
+			Sum = 1;
+		}
+
+		UNROLL
+		for (uint Index = 0; Index < 8; Index++)
+		{
+			OutAlphas[Index] /= Sum;
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+void GetVoxelMaterialLayers(
+	const FMaterialVertexParameters Parameters,
+	const Texture2D ChunkIndices_Texture,
+	const uint ChunkIndices_TextureSizeLog2,
+	const Texture2D Materials_Texture,
+	const uint Materials_TextureSizeLog2,
+	out uint4 OutLayerMask,
+	out float Alphas[8])
+{
+#if MATERIAL_PIXEL_PARAMETERS_VOXEL_VERSION == 8
+	const int Offset = GetVoxelAttributeOffset(
+		Parameters.Voxel_ChunkIndicesIndex,
+		ChunkIndices_Texture,
+		ChunkIndices_TextureSizeLog2,
+		0);
+
+	const uint4 Material = asuint(Materials_Texture[GetTextureIndex_Log2(Offset + Parameters.Voxel_VertexIndexInChunk, Materials_TextureSizeLog2)].rgba);
+
+	UnpackVoxelMaterial(
+		Material,
+		OutLayerMask,
+		Alphas);
+#endif
+}
+
+void GetVoxelMaterialLayers(
+	const FMaterialPixelParameters Parameters,
+	const Texture2D ChunkIndices_Texture,
+	const uint ChunkIndices_TextureSizeLog2,
+	const Texture2D Materials_Texture,
+	const uint Materials_TextureSizeLog2,
+	out uint4 OutLayerMask,
+	out float Alphas[8])
+{
+#if MATERIAL_PIXEL_PARAMETERS_VOXEL_VERSION == 8
+	const int Offset = GetVoxelAttributeOffset(
+		Parameters.Voxel_ChunkIndicesIndex,
+		ChunkIndices_Texture,
+		ChunkIndices_TextureSizeLog2,
+		0);
+
+	const uint4 MaterialU = asuint(Materials_Texture[GetTextureIndex_Log2(Offset + Parameters.Voxel_VertexIndicesInChunk[0], Materials_TextureSizeLog2)].rgba);
+	const uint4 MaterialV = asuint(Materials_Texture[GetTextureIndex_Log2(Offset + Parameters.Voxel_VertexIndicesInChunk[1], Materials_TextureSizeLog2)].rgba);
+	const uint4 MaterialW = asuint(Materials_Texture[GetTextureIndex_Log2(Offset + Parameters.Voxel_VertexIndicesInChunk[2], Materials_TextureSizeLog2)].rgba);
+
+	GetVoxelMaterialLayers(
+		Parameters.Voxel_Barycentrics,
+		MaterialU,
+		MaterialV,
+		MaterialW,
+		OutLayerMask,
+		Alphas);
+#endif
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+void GetVoxelDisplacement_ApplyAlphas(
+	const float Alphas[8],
+	inout float Displacements[8])
+{
+	float MaxAlpha;
+	{
+		MaxAlpha = Alphas[0];
+
+		UNROLL
+		for (uint Index = 1; Index < 8; Index++)
+		{
+			MaxAlpha = max(MaxAlpha, Alphas[Index]);
+		}
+	}
+
+	UNROLL
+	for (uint Index = 0; Index < 8; Index++)
+	{
+		// Subtract MaxAlpha otherwise all the displacements are flattened
+		Displacements[Index] += Alphas[Index] - MaxAlpha;
+	}
+}
+
+void GetVoxelDisplacement_NoSmoothness(
+	const uint4 LayerMask,
+	const float Alphas[8],
+	float Displacements[8],
+	out float Displacement,
+	out uint Layer)
+{
+	GetVoxelDisplacement_ApplyAlphas(Alphas, Displacements);
+
+	float MaxDisplacement = Displacements[0];
+	uint MaxIndex = 0;
+
+	UNROLL
+	for (uint Index = 1; Index < 8; Index++)
+	{
+		FLATTEN
+		if (MaxDisplacement < Displacements[Index])
+		{
+			MaxDisplacement = Displacements[Index];
+			MaxIndex = Index;
+		}
+	}
+
+	Displacement = MaxDisplacement;
+	Layer = VoxelLayerMask_GetLayer(LayerMask, MaxIndex, 8);
+}
+
+void GetVoxelDisplacement(
+	const float2 InPixelPosition,
+	const uint bApplyNoiseTexture,
+	const Texture2D NoiseTexture,
+	const uint4 LayerMask,
+	const float Alphas[8],
+	float Displacements[8],
+	float BlendSmoothnesses[8],
+	out float Displacement,
+	out uint Layer,
+	inout float DitherBiasDebug)
+{
+#if IS_NANITE_PASS && !VOXEL_MATERIAL_SELECTION
+	GetVoxelDisplacement_NoSmoothness(
+		LayerMask,
+		Alphas,
+		Displacements,
+		Displacement,
+		Layer);
+
+	return;
+#else
+	GetVoxelDisplacement_ApplyAlphas(Alphas, Displacements);
+
+	// Compute noise for the current pixel
+	float Noise;
+	{
+		// Pixel Position is 0.5, 1.5 etc so flooring is what we want here
+		const uint2 PixelPosition = (uint2)InPixelPosition;
+		const uint TemporalJitterIndex = (uint)View.TemporalAAParams.x;
+		// [0, 4]
+		const uint Pattern = (PixelPosition.x + 2 * PixelPosition.y + 3 * TemporalJitterIndex) % 5;
+
+		if (bApplyNoiseTexture)
+		{
+			const float PixelNoise = NoiseTexture[PixelPosition % 64].r;
+			Noise = (Pattern + PixelNoise) * 0.2f;
+		}
+		else
+		{
+			// [0, 1]
+			Noise = Pattern * 0.25f;
+		}
+
+		// We never want Noise to be exactly zero, as we could end up picking a layer whose smoothness is zero
+		// If the top layer has a smoothness of zero TotalLength * Noise will still be zero & will work
+		Noise += 0.001f;
+		Noise = min(Noise, 1.f);
+
+		DitherBiasDebug = Noise;
+	}
+
+	// Set lower displacement
+	float LowerDisplacements[8];
+	{
+		UNROLL
+		for (uint Index = 0; Index < 8; Index++)
+		{
+			LowerDisplacements[Index] = Displacements[Index] - BlendSmoothnesses[Index];
+		}
+	}
+
+	// Find max of the lower displacements
+	float MaxLowerDisplacement;
+	{
+		MaxLowerDisplacement = LowerDisplacements[0];
+
+		UNROLL
+		for (uint Index = 1; Index < 8; Index++)
+		{
+			MaxLowerDisplacement = max(MaxLowerDisplacement, LowerDisplacements[Index]);
+		}
+	}
+
+	// Clamp to the new min
+	{
+		UNROLL
+		for (uint Index = 0; Index < 8; Index++)
+		{
+			LowerDisplacements[Index] = max(LowerDisplacements[Index], MaxLowerDisplacement);
+		}
+	}
+
+	// Find total length
+	float TotalLength = 0.f;
+	{
+		UNROLL
+		for (uint Index = 0; Index < 8; Index++)
+		{
+			TotalLength += max(Displacements[Index] - LowerDisplacements[Index], 0.f);
+		}
+	}
+
+	// Find the index where Value is
+	float MaxDisplacement = 0;
+	uint MaxIndex = -1;
+	{
+		float Value = TotalLength * Noise;
+		float ValueSum = 0;
+
+		UNROLL
+		for (uint Index = 0; Index < 8; Index++)
+		{
+			FLATTEN
+			if (LowerDisplacements[Index] <= Displacements[Index])
+			{
+				const float Length = Displacements[Index] - LowerDisplacements[Index];
+				const float NextValueSum = ValueSum + Length;
+
+				FLATTEN
+				if (ValueSum <= Value && Value <= NextValueSum)
+				{
+					MaxDisplacement = Displacements[Index];
+					MaxIndex = Index;
+
+					// Fake break, nothing else can set MaxIndex now
+					Value = -1;
+				}
+
+				ValueSum = NextValueSum;
+			}
+		}
+	}
+
+	Displacement = MaxDisplacement;
+	Layer = VoxelLayerMask_GetLayer(LayerMask, MaxIndex, 8);
+
+	// To see errors
+	FLATTEN
+	if (MaxIndex == -1)
+	{
+		Layer = 0;
+	}
+#endif
+}

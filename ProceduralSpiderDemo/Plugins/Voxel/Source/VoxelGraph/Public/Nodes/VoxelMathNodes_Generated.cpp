@@ -1,0 +1,23 @@
+// Copyright Voxel Plugin SAS, 2026. All Rights Reserved.
+
+#include "VoxelISPCNodeHelpers.h"
+
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_BilinearInterpolation);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_Bitwise_And);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_Bitwise_Not);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_Bitwise_Or);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_Bitwise_Xor);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_BooleanNOR);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_BooleanNOT);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_BooleanXOR);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_BreakQuaternion);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_DistanceToColor);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_IsFinite);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_IsVoid);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_LeftShift);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_MakeQuaternion);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_MakeRotationFromX);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_MakeRotationFromY);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_MakeRotationFromZ);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_ReplaceVoid);
+REGISTER_VOXEL_NODE_ISPC(VoxelMathNodes, VoxelComputeNode_RightShift);

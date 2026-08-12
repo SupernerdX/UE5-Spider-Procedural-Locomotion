@@ -1,0 +1,12 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+	<title>MiscFlatten</title>
+	<style>
+		.s0 { fill: #ffffff }
+		.s1 { opacity: 0.5; fill: none;stroke: #ffffff;stroke-miterlimit:10;stroke-width: 3.0 }
+		.s2 { fill: none;stroke: #ffffff;stroke-miterlimit:10;stroke-width: 3.0 }
+	</style>
+	<path class="s1" d="m0 14.5	c3.5 0, 3.5 -6.5, 6 -6.5"/>
+	<path class="s2" d="m10 8	c3.5 0, 3.5 -6.5, 6 -6.5"/>
+	<path class="s1" d="m6 8 h 4"/>
+	<path class="s0" d="m14 9 h-2 v3 h-2 l3 4 3-4 h-2z"/>
+</svg>

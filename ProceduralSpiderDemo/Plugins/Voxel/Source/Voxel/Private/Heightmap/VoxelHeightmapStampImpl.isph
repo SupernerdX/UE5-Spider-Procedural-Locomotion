@@ -1,0 +1,169 @@
+// Copyright Voxel Plugin SAS, 2026. All Rights Reserved.
+
+// ReSharper disable CppCStyleCast
+// ReSharper disable CppVariableCanBeMadeConstexpr
+// ReSharper disable CppUE4CodingStandardNamingViolationWarning
+
+#include "VoxelMinimal.isph"
+#include "VoxelStampQueryImpl.isph"
+#include "VoxelSampleHeightmap.isph"
+#include "VoxelStampTransformImpl.isph"
+
+export void PREPROCESSOR_JOIN(VoxelHeightmapStamp_ApplyHeightmap_, Type)(
+	const uniform FVoxelHeightBulkQuery& Query,
+	const uniform FVoxelHeightTransform& StampToQuery,
+	const uniform EVoxelHeightBlendMode BlendMode,
+	const uniform bool bApplyOnVoid,
+	const uniform float Smoothness,
+	const uniform bool bUseBicubic,
+	const uniform float ScaleZ,
+	const uniform float OffsetZ,
+	const uniform float ScaleXY,
+	const uniform int32 SizeX,
+	const uniform int32 SizeY,
+	const uniform Type Heightmap[])
+{
+	const uniform float SizeXMinus2 = SizeX - 2.0001f;
+	const uniform float SizeYMinus2 = SizeY - 2.0001f;
+
+	const uniform float InvScaleXY = 1.f / ScaleXY;
+	const uniform float2 Offset = MakeFloat2(SizeX, SizeY) / 2.f;
+
+	for (uniform int32 IndexY = Query.StartIndex.y; IndexY < Query.EndIndex.y; IndexY++)
+	{
+		FOREACH(IndexX, Query.StartIndex.x, Query.EndIndex.x)
+		{
+			const varying int32 Index = GetIndex(Query, IndexX, IndexY);
+			const varying double2 WorldPosition = GetPosition(Query, IndexX, IndexY);
+			const varying float2 LocalPosition = InverseTransform(StampToQuery, WorldPosition);
+			const varying float2 HeightmapPosition = LocalPosition * InvScaleXY + Offset;
+
+			coherent_if (
+				HeightmapPosition.x < 1.f ||
+				HeightmapPosition.y < 1.f ||
+				HeightmapPosition.x > SizeXMinus2 ||
+				HeightmapPosition.y > SizeYMinus2)
+			{
+				continue;
+			}
+
+			const varying float NewHeight = SampleHeightmap(
+				bUseBicubic,
+				SizeX,
+				SizeY,
+				Heightmap,
+				HeightmapPosition);
+
+			coherent_if (isnan(NewHeight))
+			{
+				continue;
+			}
+
+			const varying float OldHeight = Query.Heights[Index];
+
+			varying float Alpha = 0.f;
+			Query.Heights[Index] = GetTransformedHeight(
+				StampToQuery,
+				BlendMode,
+				bApplyOnVoid,
+				Smoothness,
+				ScaleZ,
+				OffsetZ,
+				LocalPosition,
+				OldHeight,
+				NewHeight,
+				Alpha);
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+export void PREPROCESSOR_JOIN(VoxelHeightmapStamp_ApplyHeightmap_Sparse_, Type)(
+	const uniform FVoxelHeightSparseQuery& Query,
+	const uniform FVoxelHeightTransform& StampToQuery,
+	uniform float Alphas[],
+	const uniform bool bWriteHeight,
+	const uniform bool bWriteAlpha,
+	const uniform EVoxelHeightBlendMode BlendMode,
+	const uniform bool bApplyOnVoid,
+	const uniform float Smoothness,
+	const uniform bool bUseBicubic,
+	const uniform float ScaleZ,
+	const uniform float OffsetZ,
+	const uniform float ScaleXY,
+	const uniform int32 SizeX,
+	const uniform int32 SizeY,
+	const uniform Type Heightmap[])
+{
+	const uniform float SizeXMinus2 = SizeX - 2.0001f;
+	const uniform float SizeYMinus2 = SizeY - 2.0001f;
+
+	const uniform float InvScaleXY = 1.f / ScaleXY;
+	const uniform float2 Offset = MakeFloat2(SizeX, SizeY) / 2.f;
+
+	FOREACH(Index, 0, Query.Num)
+	{
+		const varying double2 WorldPosition = MakeDouble2(
+			Query.PositionsX[Index],
+			Query.PositionsY[Index]);
+		const varying float2 LocalPosition = InverseTransform(StampToQuery, WorldPosition);
+		const varying float2 HeightmapPosition = LocalPosition * InvScaleXY + Offset;
+
+		coherent_if (
+			HeightmapPosition.x < 1.f ||
+			HeightmapPosition.y < 1.f ||
+			HeightmapPosition.x > SizeXMinus2 ||
+			HeightmapPosition.y > SizeYMinus2)
+		{
+			if (bWriteAlpha)
+			{
+				Alphas[Index] = 0.f;
+			}
+			continue;
+		}
+
+		varying float NewHeight = SampleHeightmap(
+			bUseBicubic,
+			SizeX,
+			SizeY,
+			Heightmap,
+			HeightmapPosition);
+
+		coherent_if (isnan(NewHeight))
+		{
+			if (bWriteAlpha)
+			{
+				Alphas[Index] = 0.f;
+			}
+			continue;
+		}
+
+		const varying float OldHeight = GetHeight(Query, Index);
+
+		varying float Alpha = 0.f;
+		const varying float Height = GetTransformedHeight(
+			StampToQuery,
+			BlendMode,
+			bApplyOnVoid,
+			Smoothness,
+			ScaleZ,
+			OffsetZ,
+			LocalPosition,
+			OldHeight,
+			NewHeight,
+			Alpha);
+
+		if (bWriteHeight)
+		{
+			SetHeight(Query, Index, Height);
+		}
+
+		if (bWriteAlpha)
+		{
+			Alphas[Index] = Alpha;
+		}
+	}
+}

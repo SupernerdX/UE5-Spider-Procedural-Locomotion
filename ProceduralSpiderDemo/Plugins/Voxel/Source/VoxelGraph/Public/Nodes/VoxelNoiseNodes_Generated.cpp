@@ -1,0 +1,15 @@
+// Copyright Voxel Plugin SAS, 2026. All Rights Reserved.
+
+#include "VoxelISPCNodeHelpers.h"
+
+REGISTER_VOXEL_NODE_ISPC(VoxelNoiseNodes, VoxelComputeNode_CellularNoise2D);
+REGISTER_VOXEL_NODE_ISPC(VoxelNoiseNodes, VoxelComputeNode_CellularNoise3D);
+REGISTER_VOXEL_NODE_ISPC(VoxelNoiseNodes, VoxelComputeNode_MixSeeds);
+REGISTER_VOXEL_NODE_ISPC(VoxelNoiseNodes, VoxelComputeNode_PerlinNoise2D);
+REGISTER_VOXEL_NODE_ISPC(VoxelNoiseNodes, VoxelComputeNode_PerlinNoise3D);
+REGISTER_VOXEL_NODE_ISPC(VoxelNoiseNodes, VoxelComputeNode_SimplexNoise2D);
+REGISTER_VOXEL_NODE_ISPC(VoxelNoiseNodes, VoxelComputeNode_SimplexNoise3D);
+REGISTER_VOXEL_NODE_ISPC(VoxelNoiseNodes, VoxelComputeNode_TrueDistanceCellularNoise2D);
+REGISTER_VOXEL_NODE_ISPC(VoxelNoiseNodes, VoxelComputeNode_TrueDistanceCellularNoise3D);
+REGISTER_VOXEL_NODE_ISPC(VoxelNoiseNodes, VoxelComputeNode_ValueNoise2D);
+REGISTER_VOXEL_NODE_ISPC(VoxelNoiseNodes, VoxelComputeNode_ValueNoise3D);

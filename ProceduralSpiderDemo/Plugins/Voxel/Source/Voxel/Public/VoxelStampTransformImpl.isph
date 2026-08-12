@@ -1,0 +1,113 @@
+// Copyright Voxel Plugin SAS, 2026. All Rights Reserved.
+
+#pragma once
+
+#include "VoxelMinimal.isph"
+
+struct FVoxelHeightTransform
+{
+	float2 Scale;
+	float2 Rotation;
+	double2 Position;
+
+	float2 Rotation3D;
+	float ScaleZ;
+	float OffsetZ;
+
+	float MinHeight;
+	float MaxHeight;
+};
+
+FORCEINLINE varying float2 InverseTransform(
+	const uniform FVoxelHeightTransform& Transform,
+	const varying double2 Position)
+{
+	return UnrotateVector(MakeFloat2(Position - Transform.Position), Transform.Rotation) / Transform.Scale;
+}
+FORCEINLINE varying double2 InverseTransform_double(
+	const uniform FVoxelHeightTransform& Transform,
+	const varying double2 Position)
+{
+	return UnrotateVector(Position - Transform.Position, MakeDouble2(Transform.Rotation)) / MakeDouble2(Transform.Scale);
+}
+
+FORCEINLINE varying double2 Transform_double(
+	const uniform FVoxelHeightTransform& Transform,
+	const varying double2 Position)
+{
+	return Transform.Position + RotateVector(Position * MakeDouble2(Transform.Scale), MakeDouble2(Transform.Rotation));
+}
+
+FORCEINLINE varying float ClampHeight(
+	const uniform FVoxelHeightTransform& Transform,
+	const varying float Height)
+{
+	if (isnan(Height))
+	{
+		return Height;
+	}
+
+	return clamp(Height, Transform.MinHeight, Transform.MaxHeight);
+}
+
+FORCEINLINE varying float TransformHeight(
+	const uniform FVoxelHeightTransform& Transform,
+	const varying float Height,
+	const varying float2 LocalPosition)
+{
+	const varying float Rotation3DHeight = LocalPosition.x * Transform.Rotation3D.x + LocalPosition.y * Transform.Rotation3D.y;
+
+	return (Height + Rotation3DHeight) * Transform.ScaleZ + Transform.OffsetZ;
+}
+FORCEINLINE varying float InverseTransformHeight(
+	const uniform FVoxelHeightTransform& Transform,
+	const varying float Height,
+	const varying float2 LocalPosition)
+{
+	const varying float Rotation3DHeight = LocalPosition.x * Transform.Rotation3D.x + LocalPosition.y * Transform.Rotation3D.y;
+
+	return (Height - Transform.OffsetZ) / Transform.ScaleZ - Rotation3DHeight;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+struct FVoxelVolumeTransform
+{
+	float3 Scale;
+	float4 Rotation;
+	double3 Position;
+
+	float MaxDistance;
+	float DistanceScale;
+};
+
+FORCEINLINE varying float3 InverseTransform(
+	const uniform FVoxelVolumeTransform& Transform,
+	const varying double3 Position)
+{
+	return UnrotateVector(MakeFloat3(Position - Transform.Position), Transform.Rotation) / Transform.Scale;
+}
+FORCEINLINE varying double3 InverseTransform_double(
+	const uniform FVoxelVolumeTransform& Transform,
+	const varying double3 Position)
+{
+	return UnrotateVector(Position - Transform.Position, MakeDouble4(Transform.Rotation)) / MakeDouble3(Transform.Scale);
+}
+
+FORCEINLINE varying double3 Transform_double(
+	const uniform FVoxelVolumeTransform& Transform,
+	const varying double3 Position)
+{
+	return Transform.Position + RotateVector(Position * MakeDouble3(Transform.Scale), MakeDouble4(Transform.Rotation));
+}
+
+FORCEINLINE varying float TransformDistance(
+	const uniform FVoxelVolumeTransform& Transform,
+	varying float Distance)
+{
+	Distance *= Transform.DistanceScale;
+
+	return select(Distance > Transform.MaxDistance, NaNf, Distance);
+}

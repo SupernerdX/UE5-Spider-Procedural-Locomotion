@@ -1,0 +1,2467 @@
+{
+	"NodePathToPinToTooltip":
+	{
+		"/Script/Voxel.VoxelNode_BreakSurfaceTypeBlend":
+		{
+		},
+		"/Script/Voxel.VoxelNode_CachePoints":
+		{
+			"ChunkSize": "Cached entries chunk size in meters",
+			"CacheSize": "Cache size in MB"
+		},
+		"/Script/Voxel.VoxelNode_MakeSurfaceTypeBlend":
+		{
+		},
+		"/Script/Voxel.VoxelNode_MetadataPinsBase":
+		{
+		},
+		"/Script/Voxel.VoxelNode_SampleHeightmap":
+		{
+			"Heightmap": "The heightmap to sample",
+			"Position": "Position, note that the heightmap ScaleXY is applied",
+			"UseBicubic": "If true will use bicubic sampling, which is slower but better looking"
+		},
+		"/Script/Voxel.VoxelNode_SampleHeightStamp":
+		{
+		},
+		"/Script/Voxel.VoxelNode_SampleHeightStampBase":
+		{
+		},
+		"/Script/Voxel.VoxelNode_SampleHeightStampParameter":
+		{
+		},
+		"/Script/Voxel.VoxelNode_SamplePreviousHeightStamps":
+		{
+		},
+		"/Script/Voxel.VoxelNode_SamplePreviousStampsBase":
+		{
+		},
+		"/Script/Voxel.VoxelNode_SamplePreviousVolumeStamps":
+		{
+		},
+		"/Script/Voxel.VoxelNode_SampleTerrain":
+		{
+		},
+		"/Script/Voxel.VoxelNode_SampleVolumeStamp":
+		{
+		},
+		"/Script/Voxel.VoxelNode_SampleVolumeStampBase":
+		{
+		},
+		"/Script/Voxel.VoxelNode_SampleVolumeStampParameter":
+		{
+		},
+		"/Script/Voxel.VoxelNode_SampleVoxelStaticMesh":
+		{
+			"Mesh": "The mesh to sample",
+			"UseTricubic": "If true will use tricubic sampling, which is slower but better looking"
+		},
+		"/Script/Voxel.VoxelNode_ScatterBase":
+		{
+			"Name": "Debug name for this node",
+			"ChunkSize": "Chunk size, in meters"
+		},
+		"/Script/Voxel.VoxelNode_ScatterMesh":
+		{
+		},
+		"/Script/Voxel.VoxelOutputNode_MetadataBase":
+		{
+		},
+		"/Script/Voxel.VoxelOutputNode_OutputHeight":
+		{
+		},
+		"/Script/Voxel.VoxelOutputNode_OutputHeightBase":
+		{
+			"HeightRange": "Height will be clamped between Min and Max",
+			"RelativeHeightRange": "If true and the blend mode is set to Override, HeightRange will be set relative to the previous stamps heights\nUse this if your override graph is offsetting the previous height",
+			"Alpha": "The weight with which to overlay this graph surface and metadatas, over top of the previous state.\n0 means entirely the previous state, 1 means entirely this graph's state.\nUsed only with Override blend mode."
+		},
+		"/Script/Voxel.VoxelOutputNode_OutputHeightSpline":
+		{
+			"MaxWidth": "Max width of the spline"
+		},
+		"/Script/Voxel.VoxelOutputNode_OutputSculptDistance":
+		{
+		},
+		"/Script/Voxel.VoxelOutputNode_OutputSculptHeight":
+		{
+		},
+		"/Script/Voxel.VoxelOutputNode_OutputSurface":
+		{
+		},
+		"/Script/Voxel.VoxelOutputNode_OutputVolume":
+		{
+		},
+		"/Script/Voxel.VoxelOutputNode_OutputVolumeBase":
+		{
+			"Alpha": "The weight with which to overlay this graph surface and metadatas, over top of the previous state.\n0 means entirely the previous state, 1 means entirely this graph's state.\nUsed only with Override blend mode."
+		},
+		"/Script/Voxel.VoxelOutputNode_OutputVolumeSpline":
+		{
+		},
+		"/Script/Voxel.VoxelPreviewDataNode_BaseMetadata":
+		{
+		},
+		"/Script/Voxel.VoxelPreviewDataNode_BaseStampPreviewData":
+		{
+		},
+		"/Script/Voxel.VoxelPreviewDataNode_HeightPreviewData":
+		{
+		},
+		"/Script/Voxel.VoxelPreviewDataNode_HeightSculptPreviewData":
+		{
+		},
+		"/Script/Voxel.VoxelPreviewDataNode_SmartSurfaceTypePreviewData":
+		{
+		},
+		"/Script/Voxel.VoxelPreviewDataNode_SplinePreviewData":
+		{
+		},
+		"/Script/Voxel.VoxelPreviewDataNode_VolumePreviewData":
+		{
+		},
+		"/Script/Voxel.VoxelPreviewDataNode_VolumeSculptPreviewData":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Abs_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Abs_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Abs_Int32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Abs_Int64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Acos_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Acos_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_AcosDegrees_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_AcosDegrees_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Add_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Add_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Add_Int32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Add_Int64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Asin_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Asin_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_AsinDegrees_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_AsinDegrees_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Atan2_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Atan2_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Atan2Degrees_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Atan2Degrees_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Atan_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Atan_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_AtanDegrees_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_AtanDegrees_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_BilinearInterpolation":
+		{
+			"Alpha": "Usually frac(Position)",
+			"X0Y0": "Value at X=0 Y=0",
+			"X1Y0": "Value at X=1 Y=0",
+			"X0Y1": "Value at X=0 Y=1",
+			"X1Y1": "Value at X=1 Y=1",
+			"ReturnValue": "Interpolated value"
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Bitwise_And":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Bitwise_Not":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Bitwise_Or":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Bitwise_Xor":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_BooleanAND":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_BooleanNAND":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_BooleanNOR":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_BooleanNOT":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_BooleanOR":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_BooleanXOR":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_BreakQuaternion":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Ceil_DoubleToDouble":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Ceil_DoubleToInt32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Ceil_DoubleToInt64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Ceil_FloatToFloat":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Ceil_FloatToInt32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Ceil_FloatToInt64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_CellularNoise2D":
+		{
+			"Position": "Position at which to calculate output noise",
+			"Jitter": "How irregular the cells are, needs to be between 0 and 1 to avoid glitches",
+			"Seed": "Used to randomize the output noise",
+			"Value": "Distance to nearest cell center at position"
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_CellularNoise3D":
+		{
+			"Position": "Position at which to calculate output noise",
+			"Jitter": "How irregular the cells are, needs to be between 0 and 1 to avoid glitches",
+			"Seed": "Used to randomize the output noise",
+			"Value": "Distance to nearest cell center at position"
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Clamp_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Clamp_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Clamp_Int32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Clamp_Int64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Cos_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Cos_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_CosDegrees_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_CosDegrees_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_CrossProduct_2D_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_CrossProduct_2D_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_CrossProduct_3D_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_CrossProduct_3D_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_DegreesToRadians_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_DegreesToRadians_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Distance2D_3D_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Distance2D_3D_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Distance_2D_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Distance_2D_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Distance_3D_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Distance_3D_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_DistanceToColor":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Divide_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Divide_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Divide_Int32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Divide_Int64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_DotProduct_2D_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_DotProduct_2D_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_DotProduct_3D_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_DotProduct_3D_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Floor_DoubleToDouble":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Floor_DoubleToInt32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Floor_DoubleToInt64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Floor_FloatToFloat":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Floor_FloatToInt32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Floor_FloatToInt64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Frac_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Frac_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_GetPI_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_GetPI_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Greater_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Greater_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Greater_Int32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Greater_Int64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_GreaterEqual_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_GreaterEqual_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_GreaterEqual_Int32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_GreaterEqual_Int64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Interpolate":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_IsFinite":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_IsVoid":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_LeftShift":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Length_2D_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Length_2D_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Length_3D_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Length_3D_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_LengthXY_3D_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_LengthXY_3D_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Lerp":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Less_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Less_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Less_Int32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Less_Int64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_LessEqual_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_LessEqual_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_LessEqual_Int32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_LessEqual_Int64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_MakeQuaternion":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_MakeRotationFromX":
+		{
+			"X": "Doesn't need to be normalized",
+			"ReturnValue": "Rotation"
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_MakeRotationFromY":
+		{
+			"Y": "Doesn't need to be normalized",
+			"ReturnValue": "Rotation"
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_MakeRotationFromZ":
+		{
+			"Z": "Doesn't need to be normalized",
+			"ReturnValue": "Rotation"
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_MappedRangeValueClamped_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_MappedRangeValueClamped_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_MappedRangeValueUnclamped_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_MappedRangeValueUnclamped_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Max_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Max_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Max_Int32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Max_Int64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Min_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Min_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Min_Int32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Min_Int64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_MixSeeds":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Modulus_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Modulus_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Modulus_Int32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Modulus_Int64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Multiply_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Multiply_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Multiply_Int32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Multiply_Int64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_NearlyEqual_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_NearlyEqual_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Normalize_2D_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Normalize_2D_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Normalize_3D_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Normalize_3D_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_NormalToSlope_2D_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_NormalToSlope_2D_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_NormalToSlope_3D_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_NormalToSlope_3D_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_OneMinus_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_OneMinus_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_PerlinNoise2D":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_PerlinNoise3D":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Power_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Power_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_RadiansToDegrees_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_RadiansToDegrees_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_RandFloat":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_RandomRotator":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_RandomVector":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_ReplaceVoid":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_RightShift":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Round_DoubleToDouble":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Round_DoubleToInt32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Round_DoubleToInt64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Round_FloatToFloat":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Round_FloatToInt32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Round_FloatToInt64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Sign_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Sign_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Sign_Int32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Sign_Int64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_SimplexNoise2D":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_SimplexNoise3D":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Sin_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Sin_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_SinDegrees_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_SinDegrees_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_SmoothStep":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Sqrt_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Sqrt_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Subtract_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Subtract_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Subtract_Int32":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Subtract_Int64":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Tan_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_Tan_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_TanDegrees_Double":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_TanDegrees_Float":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_TrueDistanceCellularNoise2D":
+		{
+			"FirstNeighborPosition": "Closest neighbor cell position",
+			"FirstNeighborDistance": "Distance to closest neighbor edge",
+			"SecondNeighborPosition": "The second-closest neighbor cell position",
+			"SecondNeighborDistance": "Distance to the second-closest neighbor edge",
+			"ThirdNeighborPosition": "The third-closest neighbor cell position",
+			"ThirdNeighborDistance": "Distance to the third-closest neighbor edge"
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_TrueDistanceCellularNoise3D":
+		{
+			"FirstNeighborPosition": "Closest neighbor cell position",
+			"FirstNeighborDistance": "Distance to closest neighbor edge",
+			"SecondNeighborPosition": "The second-closest neighbor cell position",
+			"SecondNeighborDistance": "Distance to the second-closest neighbor edge",
+			"ThirdNeighborPosition": "The third-closest neighbor cell position",
+			"ThirdNeighborDistance": "Distance to the third-closest neighbor edge"
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_ValueNoise2D":
+		{
+		},
+		"/Script/VoxelGraph.VoxelComputeNode_ValueNoise3D":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_AddToArray":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_AdvancedNoise2D":
+		{
+			"Position": "Position at which to calculate output noise",
+			"Amplitude": "Height difference of the lowest and highest point of the noise's largest octave",
+			"FeatureScale": "Amount of space the noise will take to tile in the world, a divisor for position",
+			"Lacunarity": "A factor for how much smaller each octave's feature scale is compared to last octave's",
+			"Gain": "A factor for how much smaller each octave's amplitude is compared to last octave's",
+			"CellularJitter": "Random offset applied to cell position when using cellular noise",
+			"NumOctaves": "Amount of layers this noise should have",
+			"Seed": "Used to randomize the output noise",
+			"DefaultOctaveType": "Default octave type",
+			"Value": "Result of all octaves being added together"
+		},
+		"/Script/VoxelGraph.VoxelNode_AdvancedNoise3D":
+		{
+			"Position": "Position at which to calculate output noise",
+			"Amplitude": "Height difference of the lowest and highest point of the noise's largest octave",
+			"FeatureScale": "Amount of space the noise will take to tile in the world, a divisor for position",
+			"Lacunarity": "A factor for how much smaller each octave's feature scale is compared to last octave's",
+			"Gain": "A factor for how much smaller each octave's amplitude is compared to last octave's",
+			"CellularJitter": "Random offset applied to cell position when using cellular noise",
+			"NumOctaves": "Amount of layers this noise should have",
+			"Seed": "Used to randomize the output noise",
+			"DefaultOctaveType": "Default octave type",
+			"Value": "Result of all octaves being added together"
+		},
+		"/Script/VoxelGraph.VoxelNode_AppendArray":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_AppendNames":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_ArrayGetItem":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_ArrayLength":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_BreakStruct":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_CallExternalFunction":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_CallFunction":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_CallMemberFunction":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_CallParentMainGraph":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_CustomizeParameter":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_DomainWarp2D":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_DomainWarp3D":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_Equal":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_FilterBuffer":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_FunctionInput":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_FunctionInput_WithDefaults":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_FunctionInputBase":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_FunctionInputDefault":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_FunctionInputPreview":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_FunctionOutput":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_GetGradient2D":
+		{
+			"Granularity": "Sets how granular the result will be: if very small, will return the gradient very close to the surface\nIf bigger will give a broader gradient for that area\nGet Gradient computes a delta between values at X + Granularity, X - Granularity, Y + Granularity etc",
+			"Normalize": "Should normalize gradient output"
+		},
+		"/Script/VoxelGraph.VoxelNode_GetGradient3D":
+		{
+			"Granularity": "Sets how granular the result will be: if very small, will return the gradient very close to the surface\nIf bigger will give a broader gradient for that area\nGet Gradient computes a delta between values at X + Granularity, X - Granularity, Y + Granularity etc",
+			"Normalize": "Should normalize gradient output"
+		},
+		"/Script/VoxelGraph.VoxelNode_HeightSplitter":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_IsValidObject":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_LocalVariableDeclaration":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_LocalVariableUsage":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_MakeArray":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_MakeSeeds":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_MakeStruct":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_MakeValue":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_NotEqual":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_OverrideDownstreamPosition":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_Parameter":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_Preview":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_RaiseError":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_RandomSelect":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_RangeDebug":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_Select":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_UFunction":
+		{
+		},
+		"/Script/VoxelGraph.VoxelNode_ValueDebug":
+		{
+		},
+		"/Script/VoxelGraph.VoxelOutputNode":
+		{
+		},
+		"/Script/VoxelGraph.VoxelPreviewDataNode":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Abs":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_AbstractClampBase":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_AbstractMathConvert":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_AbstractVectorBase":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Acos":
+		{
+			"Value": "Value between -1 and 1",
+			"ReturnValue": "Angle in radians"
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_AcosDegrees":
+		{
+			"Value": "Value between -1 and 1",
+			"ReturnValue": "Angle in degrees"
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Add":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Asin":
+		{
+			"Value": "Value between -1 and 1",
+			"ReturnValue": "Angle in radians"
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_AsinDegrees":
+		{
+			"Value": "Value between -1 and 1",
+			"ReturnValue": "Angle in degrees"
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Atan":
+		{
+			"Value": "Value",
+			"ReturnValue": "Angle in radians"
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Atan2":
+		{
+			"ReturnValue": "Angle in radians"
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Atan2Degrees":
+		{
+			"ReturnValue": "Angle in degrees"
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_AtanDegrees":
+		{
+			"Value": "Value",
+			"ReturnValue": "Angle in degrees"
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_BinaryOperator":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_BooleanAND":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_BooleanNAND":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_BooleanOR":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Ceil":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Clamp":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_ClampBase":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_CommutativeAssociativeOperator":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_CompareBase":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Cos":
+		{
+			"Value": "Angle in radians",
+			"ReturnValue": "cos(x), between -1 and 1"
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_CosDegrees":
+		{
+			"Value": "Angle in degrees",
+			"ReturnValue": "cos(x), between -1 and 1"
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_CrossProduct":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_DegreesToRadians":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Distance":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Distance2D":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Divide":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_DotProduct":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_FilterBuffer":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_FloatMathNode":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Floor":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Frac":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_GetPI":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Greater":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_GreaterEqual":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Interpolate":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Length":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_LengthXY":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Lerp":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_LerpBase":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Less":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_LessEqual":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_MappedClampBase":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_MappedRangeValueClamped":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_MappedRangeValueUnclamped":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Max":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Min":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Modulus":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_MultiInputBooleanNode":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Multiply":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_NearlyEqual":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Normalize":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_NormalToSlope":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_OneMinus":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_OperatorBase":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Power":
+		{
+			"Base": "If negative, abs(Base) will be used instead",
+			"Exp": "Exponent",
+			"ReturnValue": "Result"
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_RadiansToDegrees":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_RandomVector":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Round":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Sign":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Sin":
+		{
+			"Value": "Angle in radians",
+			"ReturnValue": "sin(x), between -1 and 1"
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_SinDegrees":
+		{
+			"Value": "Angle in degrees",
+			"ReturnValue": "sin(x), between -1 and 1"
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_SmoothStep":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Sqrt":
+		{
+			"Value": "Value to compute the square root of",
+			"ReturnValue": "Square root of the input value"
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Subtract":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_Tan":
+		{
+			"Value": "Angle in radians",
+			"ReturnValue": "tan(x)"
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_TanDegrees":
+		{
+			"Value": "Angle in degrees",
+			"ReturnValue": "tan(x)"
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_UnaryOperator":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_VectorBinaryOperator":
+		{
+		},
+		"/Script/VoxelGraph.VoxelTemplateNode_VectorUnaryOperator":
+		{
+		},
+		"/Script/VoxelPCG.VoxelNode_ApplyRotation":
+		{
+		},
+		"/Script/VoxelPCG.VoxelNode_ApplyScale":
+		{
+		},
+		"/Script/VoxelPCG.VoxelNode_ApplyTranslation":
+		{
+		},
+		"/Script/VoxelPCG.VoxelNode_DensityFilter":
+		{
+		},
+		"/Script/VoxelPCG.VoxelNode_Generate2DPoints":
+		{
+			"CellSize": "A point will be placed in every cell the surface intersects with\nThis is more or less the average distance between points"
+		},
+		"/Script/VoxelPCG.VoxelNode_GetInputPoints":
+		{
+		},
+		"/Script/VoxelPCG.VoxelNode_GetParentPointAttribute":
+		{
+		},
+		"/Script/VoxelPCG.VoxelNode_GetPointAttribute":
+		{
+		},
+		"/Script/VoxelPCG.VoxelNode_GetPointSeed":
+		{
+		},
+		"/Script/VoxelPCG.VoxelNode_MergePoints":
+		{
+		},
+		"/Script/VoxelPCG.VoxelNode_PruneByDistance":
+		{
+			"BoundsExtension": "Extends the requested chunk bounds, to get more cohesive pruning results on chunk boundaries\nFor example: Distance 200, BoundsExtension 2, we'll extend the bounds by 400\nNOTE! Bounds Extension is Scatter only"
+		},
+		"/Script/VoxelPCG.VoxelNode_RaymarchLayerDistanceField":
+		{
+			"Layer": "Layer to sample",
+			"UpdateRotation": "If true, will set the new point rotation to match the distance field gradient at the new position",
+			"ForceDirection": "If true, will look for a new surface in the point downward directly, according to its rotation\nIgnored if sampling height layer",
+			"KillDistance": "If a point is further away than this distance from the surface\nat the end of the raymarching, its density will be set to 0\nIgnored if sampling height layer",
+			"Tolerance": "If distance to surface is less than this, stop the raymarching\nIgnored if sampling height layer",
+			"MaxSteps": "Max number of steps to do during raymarching\nIgnored if sampling height layer",
+			"Speed": "How \"fast\" to converge to the surface, between 0 and 1\nNewPoint = OldPoint + DistanceToSurface * Direction * Speed\nDecrease if the raymarching is imprecise\nIgnored if sampling height layer",
+			"GradientStep": "Distance between points when sampling gradients"
+		},
+		"/Script/VoxelPCG.VoxelNode_ScatterPoints":
+		{
+			"RadialOffset": "In degrees"
+		},
+		"/Script/VoxelPCG.VoxelNode_SetParentPointAttribute":
+		{
+		},
+		"/Script/VoxelPCG.VoxelNode_SetPointAttribute":
+		{
+		},
+		"/Script/VoxelPCG.VoxelNode_SplitPoints":
+		{
+		},
+		"/Script/VoxelPCG.VoxelOutputNode_OutputPoints":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_GetParentPointMesh":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_GetParentPointPosition":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_GetParentPointRotation":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_GetParentPointScale":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_GetPointAttributeBase":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_GetPointBoundsMax":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_GetPointBoundsMin":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_GetPointColor":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_GetPointDensity":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_GetPointMesh":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_GetPointPosition":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_GetPointRotation":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_GetPointScale":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_GetPointSteepness":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_SetPointAttributeBase":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_SetPointBoundsMax":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_SetPointBoundsMin":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_SetPointColor":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_SetPointDensity":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_SetPointMesh":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_SetPointPosition":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_SetPointRotation":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_SetPointScale":
+		{
+		},
+		"/Script/VoxelPCG.VoxelTemplateNode_SetPointSteepness":
+		{
+		}
+	},
+	"FunctionPathToPropertyToDefault":
+	{
+		"/Script/Voxel.VoxelHeightmapFunctionLibrary:GetHeightmapSize":
+		{
+			"Heightmap": ""
+		},
+		"/Script/Voxel.VoxelScatterFunctionLibrary:CubicPointGenerator":
+		{
+			"Layer": "{}",
+			"VoxelSize": "100",
+			"ChunkSize": "32",
+			"Seed": "{}",
+			"bQuerySurfaceTypes": "true",
+			"bResolveSurfaceTypes": "false",
+			"bSkipNaNFaces": "false",
+			"MetadatasToQuery": "{}"
+		},
+		"/Script/Voxel.VoxelScatterFunctionLibrary:GeneratePoints":
+		{
+			"Layer": "{}",
+			"DistanceBetweenPoints": "100.f",
+			"HeightScatterType": "EVoxelHeightScatterType::Grid",
+			"Looseness": "1.f",
+			"MinCellArea": "0.03f",
+			"Seed": "{}",
+			"bQuerySurfaceTypes": "true",
+			"bResolveSurfaceTypes": "false",
+			"MetadatasToQuery": "{}"
+		},
+		"/Script/Voxel.VoxelScatterFunctionLibrary:GetScatterBounds":
+		{
+			"bExtendedBounds": "false"
+		},
+		"/Script/Voxel.VoxelSculptGraphFunctionLibrary:GetPreviousDistance":
+		{
+		},
+		"/Script/Voxel.VoxelSculptGraphFunctionLibrary:GetPreviousHeight":
+		{
+			"Height": "",
+			"IsValid": ""
+		},
+		"/Script/Voxel.VoxelShapeFunctionLibrary:MakeCube":
+		{
+			"Position": "",
+			"Size": "1000.f",
+			"Roundness": "0.f"
+		},
+		"/Script/Voxel.VoxelShapeFunctionLibrary:MakeCubeBounds":
+		{
+			"Size": "1000.f"
+		},
+		"/Script/Voxel.VoxelShapeFunctionLibrary:MakeSphere":
+		{
+			"Position": "",
+			"Radius": "1000.f"
+		},
+		"/Script/Voxel.VoxelShapeFunctionLibrary:MakeSphereBounds":
+		{
+			"Radius": "1000.f"
+		},
+		"/Script/Voxel.VoxelSmartSurfaceFunctionLibrary:GetVertexNormal":
+		{
+		},
+		"/Script/Voxel.VoxelSmartSurfaceFunctionLibrary:ResolveSmartSurfaces":
+		{
+			"SurfaceTypes": "",
+			"Position": "",
+			"Normal": "FVector3f::UpVector",
+			"LOD": "0",
+			"Layer": "{}"
+		},
+		"/Script/Voxel.VoxelSplineStampFunctionLibrary:GetClosestSplineKey2D":
+		{
+			"Position": ""
+		},
+		"/Script/Voxel.VoxelSplineStampFunctionLibrary:GetClosestSplineKey3D":
+		{
+			"Position": ""
+		},
+		"/Script/Voxel.VoxelSplineStampFunctionLibrary:GetClosestSplineKeyGeneric":
+		{
+			"Position": ""
+		},
+		"/Script/Voxel.VoxelSplineStampFunctionLibrary:GetDistanceAlongSpline":
+		{
+			"SplineKey": ""
+		},
+		"/Script/Voxel.VoxelSplineStampFunctionLibrary:GetFloatSplineParameterValue":
+		{
+			"Parameter": "",
+			"SplineKey": ""
+		},
+		"/Script/Voxel.VoxelSplineStampFunctionLibrary:GetHeightAlongSpline":
+		{
+			"SplineKey": ""
+		},
+		"/Script/Voxel.VoxelSplineStampFunctionLibrary:GetLastSplineKey":
+		{
+		},
+		"/Script/Voxel.VoxelSplineStampFunctionLibrary:GetPositionAlongSpline":
+		{
+			"SplineKey": ""
+		},
+		"/Script/Voxel.VoxelSplineStampFunctionLibrary:GetSplineLength":
+		{
+		},
+		"/Script/Voxel.VoxelSplineStampFunctionLibrary:GetTransformAlongSpline":
+		{
+			"SplineKey": ""
+		},
+		"/Script/Voxel.VoxelSplineStampFunctionLibrary:GetVector2DSplineParameterValue":
+		{
+			"Parameter": "",
+			"SplineKey": ""
+		},
+		"/Script/Voxel.VoxelSplineStampFunctionLibrary:GetVectorSplineParameterValue":
+		{
+			"Parameter": "",
+			"SplineKey": ""
+		},
+		"/Script/Voxel.VoxelStampFunctionLibrary:BlendSurfaceTypes":
+		{
+			"A": "",
+			"B": "",
+			"Alpha": ""
+		},
+		"/Script/Voxel.VoxelStampFunctionLibrary:GetHeightBlendMode":
+		{
+		},
+		"/Script/Voxel.VoxelStampFunctionLibrary:GetHeightSmoothness":
+		{
+		},
+		"/Script/Voxel.VoxelStampFunctionLibrary:GetStampSeed":
+		{
+		},
+		"/Script/Voxel.VoxelStampFunctionLibrary:GetSurfaceTypeWeight":
+		{
+			"Blend": "",
+			"Type": ""
+		},
+		"/Script/Voxel.VoxelStampFunctionLibrary:GetVolumeBlendMode":
+		{
+		},
+		"/Script/Voxel.VoxelStampFunctionLibrary:GetVolumeSmoothness":
+		{
+		},
+		"/Script/Voxel.VoxelStampFunctionLibrary:HasStampsInBounds":
+		{
+			"Position": "",
+			"Layer": "",
+			"BehaviorMask": "EVoxelStampBehavior::AffectAll"
+		},
+		"/Script/Voxel.VoxelStampFunctionLibrary:IsHeightOverrideBlendMode":
+		{
+		},
+		"/Script/Voxel.VoxelStampFunctionLibrary:IsVolumeOverrideBlendMode":
+		{
+		},
+		"/Script/Voxel.VoxelStampFunctionLibrary:QueryDistance":
+		{
+			"Position": "",
+			"Layer": "",
+			"Distance": "",
+			"bIsValid": ""
+		},
+		"/Script/Voxel.VoxelStampFunctionLibrary:QueryHeight":
+		{
+			"Position": "",
+			"Layer": "",
+			"Height": "",
+			"bIsValid": ""
+		},
+		"/Script/Voxel.VoxelStampFunctionLibrary:QueryHeightMetadata":
+		{
+			"Position": "",
+			"Layer": "",
+			"Metadata": "",
+			"Height": "",
+			"Value": "",
+			"bIsValid": ""
+		},
+		"/Script/Voxel.VoxelStampFunctionLibrary:QueryHeightSurfaceType":
+		{
+			"Position": "",
+			"Layer": "",
+			"Height": "",
+			"SurfaceType": "",
+			"bIsValid": ""
+		},
+		"/Script/Voxel.VoxelStampFunctionLibrary:QueryVolumeMetadata":
+		{
+			"Position": "",
+			"Layer": "",
+			"Metadata": "",
+			"Distance": "",
+			"Value": "",
+			"bIsValid": ""
+		},
+		"/Script/Voxel.VoxelStampFunctionLibrary:QueryVolumeSurfaceType":
+		{
+			"Position": "",
+			"Layer": "",
+			"Distance": "",
+			"SurfaceType": "",
+			"bIsValid": ""
+		},
+		"/Script/Voxel.VoxelStaticMeshFunctionLibrary:GetVoxelStaticMeshBounds":
+		{
+			"Mesh": "",
+			"Scale": "1.f"
+		},
+		"/Script/Voxel.VoxelTextureFunctionLibrary:GetSize":
+		{
+			"Texture": ""
+		},
+		"/Script/Voxel.VoxelTextureFunctionLibrary:IsValid":
+		{
+			"Texture": ""
+		},
+		"/Script/Voxel.VoxelTextureFunctionLibrary:SampleTexture":
+		{
+			"Texture": "",
+			"Position": "",
+			"Scale": "100.f",
+			"Interpolation": "EVoxelTextureInterpolation::Bilinear",
+			"bSRGB": "true"
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:BooleanToInt32":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:ByteToInt32":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleLinearColorToDoubleVector":
+		{
+			"Color": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleLinearColorToDoubleVector2D":
+		{
+			"Color": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleLinearColorToLinearColor":
+		{
+			"Color": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleLinearColorToVector":
+		{
+			"Color": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleLinearColorToVector2D":
+		{
+			"Color": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleToDoubleLinearColor":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleToDoubleVector":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleToDoubleVector2D":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleToFloat":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleVector2DToDoubleLinearColor":
+		{
+			"Vector2D": "",
+			"B": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleVector2DToDoubleVector":
+		{
+			"Vector2D": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleVector2DToLinearColor":
+		{
+			"Vector2D": "",
+			"B": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleVector2DToVector":
+		{
+			"Vector2D": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleVector2DToVector2D":
+		{
+			"Vector2D": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleVectorToDoubleLinearColor":
+		{
+			"Vector": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleVectorToDoubleVector2D":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleVectorToLinearColor":
+		{
+			"Vector": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleVectorToVector":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:DoubleVectorToVector2D":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:FloatToDouble":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:FloatToLinearColor":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:FloatToVector":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:FloatToVector2D":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int32ToDouble":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int32ToFloat":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int32ToInt64":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int32ToIntPoint":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int32ToIntVector":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int32ToIntVector4":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int32ToSeed":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64PointToDoubleLinearColor":
+		{
+			"IntPoint": "",
+			"B": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64PointToDoubleVector":
+		{
+			"IntPoint": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64PointToDoubleVector2D":
+		{
+			"IntPoint": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64PointToInt64Vector":
+		{
+			"IntPoint": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64PointToInt64Vector4":
+		{
+			"IntPoint": "",
+			"Z": "",
+			"W": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64PointToIntPoint":
+		{
+			"IntPoint": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64PointToIntVector":
+		{
+			"IntPoint": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64PointToIntVector4":
+		{
+			"IntPoint": "",
+			"Z": "",
+			"W": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64PointToLinearColor":
+		{
+			"IntPoint": "",
+			"B": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64PointToVector":
+		{
+			"IntPoint": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64PointToVector2D":
+		{
+			"IntPoint": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64ToDouble":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64ToFloat":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64ToInt32":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64ToInt64Point":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64ToInt64Vector":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64ToInt64Vector4":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64Vector4ToDoubleLinearColor":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64Vector4ToDoubleVector":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64Vector4ToDoubleVector2D":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64Vector4ToInt64Point":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64Vector4ToInt64Vector":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64Vector4ToIntPoint":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64Vector4ToIntVector":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64Vector4ToIntVector4":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64Vector4ToLinearColor":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64Vector4ToVector":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64Vector4ToVector2D":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64VectorToDoubleLinearColor":
+		{
+			"Vector": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64VectorToDoubleVector":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64VectorToDoubleVector2D":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64VectorToInt64Point":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64VectorToInt64Vector4":
+		{
+			"Vector": "",
+			"W": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64VectorToIntPoint":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64VectorToIntVector":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64VectorToIntVector4":
+		{
+			"Vector": "",
+			"W": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64VectorToLinearColor":
+		{
+			"Vector": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64VectorToVector":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Int64VectorToVector2D":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntPointToDoubleLinearColor":
+		{
+			"IntPoint": "",
+			"B": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntPointToDoubleVector":
+		{
+			"IntPoint": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntPointToDoubleVector2D":
+		{
+			"IntPoint": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntPointToInt64Point":
+		{
+			"IntPoint": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntPointToInt64Vector":
+		{
+			"IntPoint": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntPointToInt64Vector4":
+		{
+			"IntPoint": "",
+			"Z": "",
+			"W": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntPointToIntVector":
+		{
+			"IntPoint": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntPointToIntVector4":
+		{
+			"IntPoint": "",
+			"Z": "",
+			"W": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntPointToLinearColor":
+		{
+			"IntPoint": "",
+			"B": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntPointToVector":
+		{
+			"IntPoint": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntPointToVector2D":
+		{
+			"IntPoint": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVector4ToDoubleLinearColor":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVector4ToDoubleVector":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVector4ToDoubleVector2D":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVector4ToInt64Point":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVector4ToInt64Vector":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVector4ToInt64Vector4":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVector4ToIntPoint":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVector4ToIntVector":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVector4ToLinearColor":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVector4ToVector":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVector4ToVector2D":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVectorToDoubleLinearColor":
+		{
+			"Vector": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVectorToDoubleVector":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVectorToDoubleVector2D":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVectorToInt64Point":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVectorToInt64Vector":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVectorToInt64Vector4":
+		{
+			"Vector": "",
+			"W": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVectorToIntPoint":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVectorToIntVector4":
+		{
+			"Vector": "",
+			"W": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVectorToLinearColor":
+		{
+			"Vector": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVectorToVector":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:IntVectorToVector2D":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:LinearColorToDoubleLinearColor":
+		{
+			"Color": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:LinearColorToDoubleVector":
+		{
+			"Color": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:LinearColorToDoubleVector2D":
+		{
+			"Color": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:LinearColorToVector":
+		{
+			"Color": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:LinearColorToVector2D":
+		{
+			"Color": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:NormalToVector":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:SeedToInt32":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Vector2DToDoubleLinearColor":
+		{
+			"Vector2D": "",
+			"B": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Vector2DToDoubleVector":
+		{
+			"Vector2D": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Vector2DToDoubleVector2D":
+		{
+			"Vector2D": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Vector2DToLinearColor":
+		{
+			"Vector2D": "",
+			"B": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:Vector2DToVector":
+		{
+			"Vector2D": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:VectorToDoubleLinearColor":
+		{
+			"Vector": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:VectorToDoubleVector":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:VectorToDoubleVector2D":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:VectorToLinearColor":
+		{
+			"Vector": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:VectorToNormal":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelAutocastFunctionLibrary:VectorToVector2D":
+		{
+			"Vector": ""
+		},
+		"/Script/VoxelGraph.VoxelBasicFunctionLibrary:GetCollisionEnabled":
+		{
+			"BodyInstance": ""
+		},
+		"/Script/VoxelGraph.VoxelBasicFunctionLibrary:GetLocalToWorldTransform":
+		{
+		},
+		"/Script/VoxelGraph.VoxelBasicFunctionLibrary:GetLOD":
+		{
+		},
+		"/Script/VoxelGraph.VoxelBasicFunctionLibrary:GetLODStep":
+		{
+		},
+		"/Script/VoxelGraph.VoxelBasicFunctionLibrary:HashPosition":
+		{
+			"Position": "",
+			"Seed": "",
+			"RoundingDecimals": "3"
+		},
+		"/Script/VoxelGraph.VoxelBasicFunctionLibrary:IsPreviewScene":
+		{
+		},
+		"/Script/VoxelGraph.VoxelBasicFunctionLibrary:RandUnitVector":
+		{
+			"Seed": ""
+		},
+		"/Script/VoxelGraph.VoxelBasicFunctionLibrary:ToBuffer":
+		{
+			"Value": ""
+		},
+		"/Script/VoxelGraph.VoxelBoxFunctionLibrary:BreakBox":
+		{
+			"Box": "",
+			"Min": "",
+			"Max": ""
+		},
+		"/Script/VoxelGraph.VoxelBoxFunctionLibrary:BreakBox2D":
+		{
+			"Box": "",
+			"Min": "",
+			"Max": ""
+		},
+		"/Script/VoxelGraph.VoxelBoxFunctionLibrary:ExtendBox":
+		{
+			"Box": "",
+			"Amount": ""
+		},
+		"/Script/VoxelGraph.VoxelBoxFunctionLibrary:ExtendBox2D":
+		{
+			"Box": "",
+			"Amount": ""
+		},
+		"/Script/VoxelGraph.VoxelBoxFunctionLibrary:IsBox2DValid":
+		{
+			"Box": ""
+		},
+		"/Script/VoxelGraph.VoxelBoxFunctionLibrary:IsBoxValid":
+		{
+			"Box": ""
+		},
+		"/Script/VoxelGraph.VoxelBoxFunctionLibrary:MakeBox":
+		{
+			"Min": "",
+			"Max": ""
+		},
+		"/Script/VoxelGraph.VoxelBoxFunctionLibrary:MakeBox2D":
+		{
+			"Min": "",
+			"Max": ""
+		},
+		"/Script/VoxelGraph.VoxelBoxFunctionLibrary:MakeBox2DFromRadius":
+		{
+			"Radius": ""
+		},
+		"/Script/VoxelGraph.VoxelBoxFunctionLibrary:MakeBoxFromRadius":
+		{
+			"Radius": ""
+		},
+		"/Script/VoxelGraph.VoxelBoxFunctionLibrary:MakeInfiniteBox":
+		{
+		},
+		"/Script/VoxelGraph.VoxelBoxFunctionLibrary:TransformBox":
+		{
+			"LocalBox": "",
+			"LocalToWorld": ""
+		},
+		"/Script/VoxelGraph.VoxelCurveFunctionLibrary:MakeCurveFromAsset":
+		{
+			"Asset": ""
+		},
+		"/Script/VoxelGraph.VoxelCurveFunctionLibrary:SampleCurve":
+		{
+			"Value": "",
+			"Curve": "",
+			"bFastCurve": "true"
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:BreakDoubleLinearColor":
+		{
+			"Value": "",
+			"R": "",
+			"G": "",
+			"B": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:BreakDoubleVector":
+		{
+			"Value": "",
+			"X": "",
+			"Y": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:BreakDoubleVector2D":
+		{
+			"Value": "",
+			"X": "",
+			"Y": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:BreakFloatRange":
+		{
+			"Value": "",
+			"Min": "",
+			"Max": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:BreakInt32Range":
+		{
+			"Value": "",
+			"Min": "",
+			"Max": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:BreakInt64Point":
+		{
+			"Value": "",
+			"X": "",
+			"Y": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:BreakInt64Vector":
+		{
+			"Value": "",
+			"X": "",
+			"Y": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:BreakInt64Vector4":
+		{
+			"Value": "",
+			"X": "",
+			"Y": "",
+			"Z": "",
+			"W": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:BreakIntPoint":
+		{
+			"Value": "",
+			"X": "",
+			"Y": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:BreakIntVector":
+		{
+			"Value": "",
+			"X": "",
+			"Y": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:BreakIntVector4":
+		{
+			"Value": "",
+			"X": "",
+			"Y": "",
+			"Z": "",
+			"W": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:BreakLinearColor":
+		{
+			"Value": "",
+			"R": "",
+			"G": "",
+			"B": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:BreakNormal":
+		{
+			"Value": "",
+			"X": "",
+			"Y": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:BreakTransform":
+		{
+			"Value": "",
+			"Translation": "",
+			"Rotation": "",
+			"Scale": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:BreakVector":
+		{
+			"Value": "",
+			"X": "",
+			"Y": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:BreakVector2D":
+		{
+			"Value": "",
+			"X": "",
+			"Y": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:CombineRotation":
+		{
+			"A": "",
+			"B": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:CombineTransform":
+		{
+			"A": "",
+			"B": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:GetForwardVector":
+		{
+			"Q": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:GetRightVector":
+		{
+			"Q": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:GetUpVector":
+		{
+			"Q": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:InverseTransformLocation":
+		{
+			"Location": "",
+			"Transform": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:LerpRotation":
+		{
+			"A": "",
+			"B": "",
+			"Alpha": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:MakeDoubleLinearColor":
+		{
+			"R": "",
+			"G": "",
+			"B": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:MakeDoubleVector":
+		{
+			"X": "",
+			"Y": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:MakeDoubleVector2D":
+		{
+			"X": "",
+			"Y": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:MakeFloatRange":
+		{
+			"Min": "",
+			"Max": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:MakeInt32Range":
+		{
+			"Min": "",
+			"Max": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:MakeInt64Point":
+		{
+			"X": "",
+			"Y": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:MakeInt64Vector":
+		{
+			"X": "",
+			"Y": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:MakeInt64Vector4":
+		{
+			"X": "",
+			"Y": "",
+			"Z": "",
+			"W": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:MakeIntPoint":
+		{
+			"X": "",
+			"Y": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:MakeIntVector":
+		{
+			"X": "",
+			"Y": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:MakeIntVector4":
+		{
+			"X": "",
+			"Y": "",
+			"Z": "",
+			"W": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:MakeLinearColor":
+		{
+			"R": "",
+			"G": "",
+			"B": "",
+			"A": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:MakeNormal":
+		{
+			"X": "",
+			"Y": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:MakeTransform":
+		{
+			"Translation": "",
+			"Rotation": "",
+			"Scale": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:MakeVector":
+		{
+			"X": "",
+			"Y": "",
+			"Z": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:MakeVector2D":
+		{
+			"X": "",
+			"Y": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:MakeVoid":
+		{
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:RotateVector":
+		{
+			"A": "",
+			"B": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:RotateVector2D":
+		{
+			"A": "",
+			"AngleDeg": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:SmoothIntersection":
+		{
+			"OutDistance": "",
+			"OutAlpha": "",
+			"A": "",
+			"B": "",
+			"Smoothness": "100.f"
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:SmoothMax":
+		{
+			"OutDistance": "",
+			"OutAlpha": "",
+			"A": "",
+			"B": "",
+			"Smoothness": "100.f"
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:SmoothMin":
+		{
+			"OutDistance": "",
+			"OutAlpha": "",
+			"A": "",
+			"B": "",
+			"Smoothness": "100.f"
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:SmoothSubtraction":
+		{
+			"OutDistance": "",
+			"OutAlpha": "",
+			"A": "",
+			"B": "",
+			"Smoothness": "100.f"
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:SmoothUnion":
+		{
+			"OutDistance": "",
+			"OutAlpha": "",
+			"A": "",
+			"B": "",
+			"Smoothness": "100.f"
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:TransformLocation":
+		{
+			"Location": "",
+			"Transform": ""
+		},
+		"/Script/VoxelGraph.VoxelMathFunctionLibrary:UnrotateVector":
+		{
+			"A": "",
+			"B": ""
+		},
+		"/Script/VoxelGraph.VoxelPositionFunctionLibrary:GetPosition2D":
+		{
+			"Space": ""
+		},
+		"/Script/VoxelGraph.VoxelPositionFunctionLibrary:GetPosition2D_Double":
+		{
+			"Space": ""
+		},
+		"/Script/VoxelGraph.VoxelPositionFunctionLibrary:GetPosition3D":
+		{
+			"Space": "",
+			"bFallbackTo2D": "false"
+		},
+		"/Script/VoxelGraph.VoxelPositionFunctionLibrary:GetPosition3D_Double":
+		{
+			"Space": "",
+			"bFallbackTo2D": "false"
+		},
+		"/Script/VoxelGraph.VoxelRandomNodesFunctionLibrary:BreakRandomVectorSettings":
+		{
+			"Value": "",
+			"RangeX": "",
+			"RangeY": "",
+			"RangeZ": ""
+		},
+		"/Script/VoxelGraph.VoxelRandomNodesFunctionLibrary:MakeRandomVectorSettings":
+		{
+			"Type": "",
+			"RangeX": "",
+			"RangeY": "",
+			"RangeZ": ""
+		},
+		"/Script/VoxelPCG.VoxelPCGFunctionLibrary:GetPCGBounds":
+		{
+		}
+	}
+}

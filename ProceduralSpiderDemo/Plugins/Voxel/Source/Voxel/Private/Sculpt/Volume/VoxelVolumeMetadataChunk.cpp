@@ -1,0 +1,158 @@
+// Copyright Voxel Plugin SAS, 2026. All Rights Reserved.
+
+#include "Sculpt/Volume/VoxelVolumeMetadataChunk.h"
+#include "Sculpt/VoxelSculptVersion.h"
+
+DEFINE_VOXEL_INSTANCE_COUNTER(FVoxelVolumeMetadataChunk);
+DEFINE_VOXEL_MEMORY_STAT(STAT_VoxelVolumeMetadata_Memory);
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+FVoxelVolumeMetadataChunk::FVoxelVolumeMetadataChunk()
+{
+	UpdateStats();
+}
+
+void FVoxelVolumeMetadataChunk::Serialize(
+	FArchive& Ar,
+	const int32 Version)
+{
+	VOXEL_FUNCTION_COUNTER();
+
+	if (Version < FVoxelSculptVersion::MergeVersions)
+	{
+		using FVersion = DECLARE_VOXEL_VERSION
+		(
+			FirstVersion
+		);
+
+		int32 LegacyVersion = FVersion::LatestVersion;
+		Ar << LegacyVersion;
+	}
+
+	Ar << Alphas;
+	FVoxelBuffer::Serialize(Ar, Buffer);
+}
+
+void FVoxelVolumeMetadataChunk::GetAverageValue(
+	const FVoxelMetadataRef& MetadataRef,
+	float& OutAlpha,
+	FVoxelBuffer& OutBuffer,
+	const int32 IndexInBuffer) const
+{
+	VOXEL_FUNCTION_COUNTER();
+
+	uint8 MaxAlpha = 0;
+	{
+		int32 AlphaSum = 0;
+		for (const uint8 Alpha : Alphas)
+		{
+			AlphaSum += Alpha;
+			MaxAlpha = FMath::Max(MaxAlpha, Alpha);
+		}
+		OutAlpha = AlphaSum / (255.f * ChunkCount);
+
+		checkVoxelSlow(0.f <= OutAlpha && OutAlpha <= 1.f);
+	}
+
+	if (!Buffer)
+	{
+		return;
+	}
+
+	SwitchType(MetadataRef, [&]<typename InnerType>()
+	{
+		const TVoxelBufferType<InnerType>& TypedBuffer = Buffer->AsChecked<TVoxelBufferType<InnerType>>();
+
+		InnerType Sum = FVoxelUtilities::MakeSafe<InnerType>();
+
+		for (int32 Index = 0; Index < ChunkCount; Index++)
+		{
+			Sum += TypedBuffer[Index] * Alphas[Index] / float(MaxAlpha);
+		}
+
+		TVoxelBufferType<InnerType>& TypedOutBuffer = OutBuffer.AsChecked<TVoxelBufferType<InnerType>>();
+		TypedOutBuffer.Set(IndexInBuffer, Sum / float(ChunkCount));
+	});
+}
+
+int64 FVoxelVolumeMetadataChunk::GetAllocatedSize() const
+{
+	int64 AllocatedSize = 0;
+	AllocatedSize += Alphas.GetAllocatedSize();
+	if (Buffer)
+	{
+		AllocatedSize += Buffer->GetAllocatedSize();
+	}
+	return AllocatedSize;
+}
+
+TVoxelRefCountPtr<FVoxelVolumeMetadataChunk> FVoxelVolumeMetadataChunk::Clone() const
+{
+	VOXEL_FUNCTION_COUNTER();
+
+	FVoxelVolumeMetadataChunk* Result = new FVoxelVolumeMetadataChunk();
+	Result->Alphas = Alphas;
+	if (ensure(Buffer))
+	{
+		Result->Buffer = Buffer->MakeDeepCopy();
+	}
+
+	Result->UpdateStats();
+	return Result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+TVoxelRefCountPtr<FVoxelVolumeMetadataChunk> FVoxelVolumeMetadataChunk::Create(
+	const TConstVoxelArrayView<float> Alphas,
+	const FVoxelBuffer& Buffer,
+	const FIntVector& Offset,
+	const FIntVector& Size)
+{
+	VOXEL_FUNCTION_COUNTER();
+
+	TVoxelRefCountPtr<FVoxelVolumeMetadataChunk> Chunk = new FVoxelVolumeMetadataChunk();
+
+	TVoxelArray<int32> Indirection;
+	FVoxelUtilities::SetNumFast(Indirection, ChunkCount);
+	{
+		VOXEL_SCOPE_COUNTER("Build indirection");
+
+		for (int32 IndexZ = 0; IndexZ < ChunkSize; IndexZ++)
+		{
+			for (int32 IndexY = 0; IndexY < ChunkSize; IndexY++)
+			{
+				for (int32 IndexX = 0; IndexX < ChunkSize; IndexX++)
+				{
+					const int32 IndexInChunk = FVoxelUtilities::Get3DIndex<int32>(
+						ChunkSize,
+						IndexX,
+						IndexY,
+						IndexZ);
+
+					const int32 IndexInSculpt = FVoxelUtilities::Get3DIndex<int32>(
+						Size,
+						Offset.X + IndexX,
+						Offset.Y + IndexY,
+						Offset.Z + IndexZ);
+
+					Chunk->Alphas[IndexInChunk] = FVoxelUtilities::FloatToUINT8(Alphas[IndexInSculpt]);
+					Indirection[IndexInChunk] = IndexInSculpt;
+				}
+			}
+		}
+	}
+
+	if (FVoxelUtilities::AllEqual(Chunk->Alphas, 0))
+	{
+		return nullptr;
+	}
+
+	Chunk->Buffer = Buffer.Gather(Indirection);
+	return Chunk;
+}

@@ -1,0 +1,310 @@
+// Copyright Voxel Plugin SAS, 2026. All Rights Reserved.
+
+// ReSharper disable CppCStyleCast
+
+#define TypeToLinear(Value) ((float)(Value))
+#define FUNCTION(Interpolation) PREPROCESSOR_JOIN_4(VoxelTextureFunctionLibrary_Sample, Interpolation, _, Type)
+
+export void FUNCTION(Nearest)(
+	uniform float OutValues[],
+	const uniform Type Texture[],
+	const uniform float PositionsX[],
+	const uniform float PositionsY[],
+	const uniform bool bConstPositionsX,
+	const uniform bool bConstPositionsY,
+	const uniform int32 Num,
+	const uniform float Scale,
+	const uniform int32 SizeX,
+	const uniform int32 SizeY)
+{
+	const uniform float ScaleX = SizeX / Scale;
+	const uniform float ScaleY = SizeY / Scale;
+
+	const uniform int32 MaskX = SizeX - 1;
+	const uniform int32 MaskY = SizeY - 1;
+
+	const uniform bool bCanMask =
+		IsPowerOfTwo(SizeX) &&
+		IsPowerOfTwo(SizeY);
+
+	FOREACH(Index, 0, Num)
+	{
+		const varying float PositionX = ScaleX * (bConstPositionsX ? PositionsX[0] : PositionsX[Index]);
+		const varying float PositionY = ScaleY * (bConstPositionsY ? PositionsY[0] : PositionsY[Index]);
+
+		const varying int32 MinX = (int32)round(PositionX);
+		const varying int32 MinY = (int32)round(PositionY);
+
+		if (bCanMask)
+		{
+			IGNORE_PERF_WARNING
+			OutValues[Index] = TypeToFloat(TypeToLinear(Texture[(MinX & MaskX) + SizeX * (MinY & MaskY)]));
+		}
+		else
+		{
+			IGNORE_PERF_WARNING
+			OutValues[Index] = TypeToFloat(TypeToLinear(Texture[PositiveMod(MinX, SizeX) + SizeX * PositiveMod(MinY, SizeY)]));
+		}
+	}
+}
+
+export void FUNCTION(Bilinear)(
+	uniform float OutValues[],
+	const uniform Type Texture[],
+	const uniform float PositionsX[],
+	const uniform float PositionsY[],
+	const uniform bool bConstPositionsX,
+	const uniform bool bConstPositionsY,
+	const uniform int32 Num,
+	const uniform float Scale,
+	const uniform int32 SizeX,
+	const uniform int32 SizeY)
+{
+	const uniform float ScaleX = SizeX / Scale;
+	const uniform float ScaleY = SizeY / Scale;
+
+	const uniform int32 MaskX = SizeX - 1;
+	const uniform int32 MaskY = SizeY - 1;
+
+	const uniform bool bCanMask =
+		IsPowerOfTwo(SizeX) &&
+		IsPowerOfTwo(SizeY);
+
+	FOREACH(Index, 0, Num)
+	{
+		const varying float PositionX = ScaleX * (bConstPositionsX ? PositionsX[0] : PositionsX[Index]);
+		const varying float PositionY = ScaleY * (bConstPositionsY ? PositionsY[0] : PositionsY[Index]);
+
+		const varying float MinXf = floor(PositionX);
+		const varying float MinYf = floor(PositionY);
+
+		const varying float AlphaX = PositionX - MinXf;
+		const varying float AlphaY = PositionY - MinYf;
+
+		const varying int32 MinX = (int32)MinXf;
+		const varying int32 MinY = (int32)MinYf;
+
+		if (bCanMask)
+		{
+			IGNORE_PERF_WARNING
+			OutValues[Index] = TypeToFloat(BilinearInterpolation(
+				TypeToLinear(Texture[((MinX + 0) & MaskX) + SizeX * ((MinY + 0) & MaskY)]),
+				TypeToLinear(Texture[((MinX + 1) & MaskX) + SizeX * ((MinY + 0) & MaskY)]),
+				TypeToLinear(Texture[((MinX + 0) & MaskX) + SizeX * ((MinY + 1) & MaskY)]),
+				TypeToLinear(Texture[((MinX + 1) & MaskX) + SizeX * ((MinY + 1) & MaskY)]),
+				AlphaX,
+				AlphaY));
+		}
+		else
+		{
+			const varying int32 MinX0 = PositiveMod(MinX, SizeX);
+			const varying int32 MinY0 = PositiveMod(MinY, SizeY);
+			IGNORE_PERF_WARNING
+			const varying int32 MinX1 = (MinX0 + 1) % SizeX;
+			IGNORE_PERF_WARNING
+			const varying int32 MinY1 = (MinY0 + 1) % SizeY;
+
+			IGNORE_PERF_WARNING
+			OutValues[Index] = TypeToFloat(BilinearInterpolation(
+				TypeToLinear(Texture[MinX0 + SizeX * MinY0]),
+				TypeToLinear(Texture[MinX1 + SizeX * MinY0]),
+				TypeToLinear(Texture[MinX0 + SizeX * MinY1]),
+				TypeToLinear(Texture[MinX1 + SizeX * MinY1]),
+				AlphaX,
+				AlphaY));
+		}
+	}
+}
+
+export void FUNCTION(Bicubic)(
+	uniform float OutValues[],
+	const uniform Type Texture[],
+	const uniform float PositionsX[],
+	const uniform float PositionsY[],
+	const uniform bool bConstPositionsX,
+	const uniform bool bConstPositionsY,
+	const uniform int32 Num,
+	const uniform float Scale,
+	const uniform int32 SizeX,
+	const uniform int32 SizeY)
+{
+	const uniform float ScaleX = SizeX / Scale;
+	const uniform float ScaleY = SizeY / Scale;
+
+	if (!IsPowerOfTwo(SizeX) ||
+		!IsPowerOfTwo(SizeY))
+	{
+		FOREACH(Index, 0, Num)
+		{
+			const varying float PositionX = ScaleX * (bConstPositionsX ? PositionsX[0] : PositionsX[Index]);
+			const varying float PositionY = ScaleY * (bConstPositionsY ? PositionsY[0] : PositionsY[Index]);
+
+			const varying float MinXf = floor(PositionX);
+			const varying float MinYf = floor(PositionY);
+
+			const varying float AlphaX = PositionX - MinXf;
+			const varying float AlphaY = PositionY - MinYf;
+
+			const varying int32 MinX = (int32)MinXf;
+			const varying int32 MinY = (int32)MinYf;
+
+			const varying int32 MinX0 = PositiveMod(MinX - 1, SizeX);
+			const varying int32 MinY0 = PositiveMod(MinY - 1, SizeY);
+			IGNORE_PERF_WARNING
+			const varying int32 MinX1 = (MinX0 + 1) % SizeX;
+			IGNORE_PERF_WARNING
+			const varying int32 MinY1 = (MinY0 + 1) % SizeY;
+			IGNORE_PERF_WARNING
+			const varying int32 MinX2 = (MinX0 + 2) % SizeX;
+			IGNORE_PERF_WARNING
+			const varying int32 MinY2 = (MinY0 + 2) % SizeY;
+			IGNORE_PERF_WARNING
+			const varying int32 MinX3 = (MinX0 + 3) % SizeX;
+			IGNORE_PERF_WARNING
+			const varying int32 MinY3 = (MinY0 + 3) % SizeY;
+
+			IGNORE_PERF_WARNING
+			OutValues[Index] = TypeToFloat(BicubicInterpolation(
+				TypeToLinear(Texture[MinX0 + SizeX * MinY0]),
+				TypeToLinear(Texture[MinX1 + SizeX * MinY0]),
+				TypeToLinear(Texture[MinX2 + SizeX * MinY0]),
+				TypeToLinear(Texture[MinX3 + SizeX * MinY0]),
+				TypeToLinear(Texture[MinX0 + SizeX * MinY1]),
+				TypeToLinear(Texture[MinX1 + SizeX * MinY1]),
+				TypeToLinear(Texture[MinX2 + SizeX * MinY1]),
+				TypeToLinear(Texture[MinX3 + SizeX * MinY1]),
+				TypeToLinear(Texture[MinX0 + SizeX * MinY2]),
+				TypeToLinear(Texture[MinX1 + SizeX * MinY2]),
+				TypeToLinear(Texture[MinX2 + SizeX * MinY2]),
+				TypeToLinear(Texture[MinX3 + SizeX * MinY2]),
+				TypeToLinear(Texture[MinX0 + SizeX * MinY3]),
+				TypeToLinear(Texture[MinX1 + SizeX * MinY3]),
+				TypeToLinear(Texture[MinX2 + SizeX * MinY3]),
+				TypeToLinear(Texture[MinX3 + SizeX * MinY3]),
+				AlphaX,
+				AlphaY));
+		}
+
+		return;
+	}
+
+	const uniform int32 MaskX = SizeX - 1;
+	const uniform int32 MaskY = SizeY - 1;
+
+	FOREACH(Index, 0, Num)
+	{
+		const varying float PositionX = ScaleX * (bConstPositionsX ? PositionsX[0] : PositionsX[Index]);
+		const varying float PositionY = ScaleY * (bConstPositionsY ? PositionsY[0] : PositionsY[Index]);
+
+		const varying float MinXf = floor(PositionX);
+		const varying float MinYf = floor(PositionY);
+
+		const varying float AlphaX = PositionX - MinXf;
+		const varying float AlphaY = PositionY - MinYf;
+
+		const varying int32 MinX = ((int32)MinXf) & MaskX;
+		const varying int32 MinY = ((int32)MinYf) & MaskY;
+
+		if (!all(
+			0 <= MinX - 1 && MinX + 2 < SizeX &&
+			0 <= MinY - 1 && MinY + 2 < SizeY))
+		{
+			IGNORE_PERF_WARNING
+			OutValues[Index] = TypeToFloat(BicubicInterpolation(
+				TypeToLinear(Texture[((MinX - 1) & MaskX) + SizeX * ((MinY - 1) & MaskY)]),
+				TypeToLinear(Texture[((MinX + 0) & MaskX) + SizeX * ((MinY - 1) & MaskY)]),
+				TypeToLinear(Texture[((MinX + 1) & MaskX) + SizeX * ((MinY - 1) & MaskY)]),
+				TypeToLinear(Texture[((MinX + 2) & MaskX) + SizeX * ((MinY - 1) & MaskY)]),
+				TypeToLinear(Texture[((MinX - 1) & MaskX) + SizeX * ((MinY + 0) & MaskY)]),
+				TypeToLinear(Texture[((MinX + 0) & MaskX) + SizeX * ((MinY + 0) & MaskY)]),
+				TypeToLinear(Texture[((MinX + 1) & MaskX) + SizeX * ((MinY + 0) & MaskY)]),
+				TypeToLinear(Texture[((MinX + 2) & MaskX) + SizeX * ((MinY + 0) & MaskY)]),
+				TypeToLinear(Texture[((MinX - 1) & MaskX) + SizeX * ((MinY + 1) & MaskY)]),
+				TypeToLinear(Texture[((MinX + 0) & MaskX) + SizeX * ((MinY + 1) & MaskY)]),
+				TypeToLinear(Texture[((MinX + 1) & MaskX) + SizeX * ((MinY + 1) & MaskY)]),
+				TypeToLinear(Texture[((MinX + 2) & MaskX) + SizeX * ((MinY + 1) & MaskY)]),
+				TypeToLinear(Texture[((MinX - 1) & MaskX) + SizeX * ((MinY + 2) & MaskY)]),
+				TypeToLinear(Texture[((MinX + 0) & MaskX) + SizeX * ((MinY + 2) & MaskY)]),
+				TypeToLinear(Texture[((MinX + 1) & MaskX) + SizeX * ((MinY + 2) & MaskY)]),
+				TypeToLinear(Texture[((MinX + 2) & MaskX) + SizeX * ((MinY + 2) & MaskY)]),
+				AlphaX,
+				AlphaY));
+
+			continue;
+		}
+
+		const varying float p0_Y_MultiplierVector = ((-0.5f * AlphaY + 1.0f) * AlphaY - 0.5f) * AlphaY + 0.0f;
+		const varying float p1_Y_MultiplierVector = ((+1.5f * AlphaY - 2.5f) * AlphaY - 0.0f) * AlphaY + 1.0f;
+		const varying float p2_Y_MultiplierVector = ((-1.5f * AlphaY + 2.0f) * AlphaY + 0.5f) * AlphaY + 0.0f;
+		const varying float p3_Y_MultiplierVector = ((+0.5f * AlphaY - 0.5f) * AlphaY + 0.0f) * AlphaY + 0.0f;
+
+		const varying int32 BaseIndexVector = (MinX - 1) + SizeX * (MinY - 1);
+
+		varying float Result;
+
+		// Read the current active lanes
+		const uniform int64 LaneMask = lanemask_unsafe();
+
+		// Reset active lanes
+		unmasked_unsafe
+		{
+			UNROLL_N(TARGET_WIDTH)
+			for (uniform int32 Lane = 0; Lane < programCount; Lane++)
+			{
+				if (!(LaneMask & (1u << Lane)))
+				{
+					continue;
+				}
+
+				const uniform int32 BaseIndex = extract(BaseIndexVector, Lane);
+				const uniform int32 LaneMinX = extract(MinX, Lane);
+				const uniform int32 LaneMinY = extract(MinY, Lane);
+				const uniform float LaneAlphaX = extract(AlphaX, Lane);
+				const uniform float p0_Y_Multiplier = extract(p0_Y_MultiplierVector, Lane);
+				const uniform float p1_Y_Multiplier = extract(p1_Y_MultiplierVector, Lane);
+				const uniform float p2_Y_Multiplier = extract(p2_Y_MultiplierVector, Lane);
+				const uniform float p3_Y_Multiplier = extract(p3_Y_MultiplierVector, Lane);
+
+				check(0 <= LaneMinX - 1 && LaneMinX + 2 < SizeX);
+				check(0 <= LaneMinY - 1 && LaneMinY + 2 < SizeY);
+				check(BaseIndex + 2 * SizeX + TARGET_WIDTH <= SizeX * SizeY);
+#if TARGET_WIDTH == 8
+				check(BaseIndex + 3 * SizeX - 4 + TARGET_WIDTH <= SizeX * SizeY);
+#elif TARGET_WIDTH == 4
+				check(BaseIndex + 3 * SizeX + TARGET_WIDTH <= SizeX * SizeY);
+#endif
+
+				const varying float p0 = TypeToLinear(Texture[BaseIndex + 0 * SizeX + programIndex]);
+				const varying float p1 = TypeToLinear(Texture[BaseIndex + 1 * SizeX + programIndex]);
+				const varying float p2 = TypeToLinear(Texture[BaseIndex + 2 * SizeX + programIndex]);
+#if TARGET_WIDTH == 8
+				// Don't access out of bounds
+				const varying float p3 = rotate(TypeToLinear(Texture[BaseIndex + 3 * SizeX - 4 + programIndex]), 4);
+#elif TARGET_WIDTH == 4
+				const varying float p3 = TypeToLinear(Texture[BaseIndex + 3 * SizeX + programIndex]);
+#endif
+
+				const varying float A = MakeRegister4_ZeroPadded(+0.0f, +1.0f, +0.0f, +0.0f);
+				const varying float B = MakeRegister4_ZeroPadded(-0.5f, -0.0f, +0.5f, +0.0f);
+				const varying float C = MakeRegister4_ZeroPadded(+1.0f, -2.5f, +2.0f, -0.5f);
+				const varying float D = MakeRegister4_ZeroPadded(-0.5f, +1.5f, -1.5f, +0.5f);
+
+				const varying float p0123_X_Multiplier = A + LaneAlphaX * (B + LaneAlphaX * (C + LaneAlphaX * D));
+
+				const uniform float Value = reduce_add(
+					p0123_X_Multiplier * (
+						p0_Y_Multiplier * p0 +
+						p1_Y_Multiplier * p1 +
+						p2_Y_Multiplier * p2 +
+						p3_Y_Multiplier * p3));
+
+				Result = insert(Result, Lane, Value);
+			}
+		}
+
+		OutValues[Index] = TypeToFloat(Result);
+	}
+}
+
+#undef TypeToLinear
+#undef FUNCTION

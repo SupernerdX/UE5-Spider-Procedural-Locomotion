@@ -1,0 +1,20 @@
+// Copyright Voxel Plugin SAS, 2026. All Rights Reserved.
+
+#include "VoxelISPCNodeHelpers.h"
+
+REGISTER_VOXEL_NODE_ISPC(VoxelCompareNodes, VoxelComputeNode_Greater_Double);
+REGISTER_VOXEL_NODE_ISPC(VoxelCompareNodes, VoxelComputeNode_Greater_Float);
+REGISTER_VOXEL_NODE_ISPC(VoxelCompareNodes, VoxelComputeNode_Greater_Int32);
+REGISTER_VOXEL_NODE_ISPC(VoxelCompareNodes, VoxelComputeNode_Greater_Int64);
+REGISTER_VOXEL_NODE_ISPC(VoxelCompareNodes, VoxelComputeNode_GreaterEqual_Double);
+REGISTER_VOXEL_NODE_ISPC(VoxelCompareNodes, VoxelComputeNode_GreaterEqual_Float);
+REGISTER_VOXEL_NODE_ISPC(VoxelCompareNodes, VoxelComputeNode_GreaterEqual_Int32);
+REGISTER_VOXEL_NODE_ISPC(VoxelCompareNodes, VoxelComputeNode_GreaterEqual_Int64);
+REGISTER_VOXEL_NODE_ISPC(VoxelCompareNodes, VoxelComputeNode_Less_Double);
+REGISTER_VOXEL_NODE_ISPC(VoxelCompareNodes, VoxelComputeNode_Less_Float);
+REGISTER_VOXEL_NODE_ISPC(VoxelCompareNodes, VoxelComputeNode_Less_Int32);
+REGISTER_VOXEL_NODE_ISPC(VoxelCompareNodes, VoxelComputeNode_Less_Int64);
+REGISTER_VOXEL_NODE_ISPC(VoxelCompareNodes, VoxelComputeNode_LessEqual_Double);
+REGISTER_VOXEL_NODE_ISPC(VoxelCompareNodes, VoxelComputeNode_LessEqual_Float);
+REGISTER_VOXEL_NODE_ISPC(VoxelCompareNodes, VoxelComputeNode_LessEqual_Int32);
+REGISTER_VOXEL_NODE_ISPC(VoxelCompareNodes, VoxelComputeNode_LessEqual_Int64);

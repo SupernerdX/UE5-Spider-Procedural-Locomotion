@@ -1,0 +1,92 @@
+// Copyright Voxel Plugin SAS, 2026. All Rights Reserved.
+
+#include "Common.ush"
+#include "/Engine/Generated/Material.ush"
+
+#if INTELLISENSE_PARSER
+struct
+{
+	Buffer<float4> Vertices;
+	Buffer<float4> TangentX;
+	Buffer<float4> TangentY;
+	Buffer<float4> TangentZ;
+	Buffer<float4> Colors;
+	Buffer<float2> TextureCoordinates0;
+	Buffer<float2> TextureCoordinates1;
+	Buffer<float2> TextureCoordinates2;
+	Buffer<float2> TextureCoordinates3;
+	int Attribute;
+	RWBuffer<float4> OutData;
+} StaticMeshParameters;
+#endif
+
+[numthreads(64, 1, 1)]
+void Main(const uint DispatchThreadID : SV_DispatchThreadID)
+{
+	FMaterialPixelParameters Parameters = MakeInitializedMaterialPixelParameters();
+	Parameters.TwoSidedSign = 1;
+	Parameters.UnMirrored = 1;
+
+	{
+		float3 TangentX = normalize(StaticMeshParameters.TangentX[DispatchThreadID].xyz);
+		float3 TangentY = normalize(StaticMeshParameters.TangentY[DispatchThreadID].xyz);
+		const float3 TangentZ = normalize(StaticMeshParameters.TangentZ[DispatchThreadID].xyz);
+
+		if (all(StaticMeshParameters.TangentX[DispatchThreadID].xyz == float3(0, 0, 0)))
+		{
+			// Same logic as GetAttributeData in NaniteAttributeDecode.ush
+			const float Sign = TangentZ.z >= 0 ? 1 : -1;
+			const float a = -rcp(Sign + TangentZ.z);
+			const float b = TangentZ.x * TangentZ.y * a;
+
+			TangentX = float3(1 + Sign * a * Pow2(TangentZ.x), Sign * b, -Sign * TangentZ.x);
+			TangentY = float3(b, Sign + a * Pow2(TangentZ.y), -TangentZ.y);
+		}
+
+		Parameters.WorldNormal = TangentZ;
+		Parameters.TangentToWorld = float3x3(TangentX, TangentY, TangentZ);
+	}
+
+	Parameters.VertexColor = StaticMeshParameters.Colors[DispatchThreadID];
+
+#if NUM_MATERIAL_TEXCOORDS_VERTEX > 0
+	Parameters.TexCoords[0] = StaticMeshParameters.TextureCoordinates0[DispatchThreadID];
+#endif
+#if NUM_MATERIAL_TEXCOORDS_VERTEX > 1
+	Parameters.TexCoords[1] = StaticMeshParameters.TextureCoordinates1[DispatchThreadID];
+#endif
+#if NUM_MATERIAL_TEXCOORDS_VERTEX > 2
+	Parameters.TexCoords[2] = StaticMeshParameters.TextureCoordinates2[DispatchThreadID];
+#endif
+#if NUM_MATERIAL_TEXCOORDS_VERTEX > 3
+	Parameters.TexCoords[3] = StaticMeshParameters.TextureCoordinates3[DispatchThreadID];
+#endif
+
+	const float3 WorldPosition = StaticMeshParameters.Vertices[DispatchThreadID].xyz;
+
+	FPixelMaterialInputs PixelMaterialInputs;
+	CalcMaterialParametersEx(
+		Parameters,
+		PixelMaterialInputs,
+		0,
+		0,
+		true,
+		WorldPosition,
+		WorldPosition);
+
+	float4 Value = 0;
+	switch (StaticMeshParameters.Attribute)
+	{
+	case 0: Value.rgb = GetMaterialBaseColorRaw(PixelMaterialInputs); break;
+	case 1: Value.rgb = GetMaterialEmissiveRaw(PixelMaterialInputs); break;
+#if MATERIAL_TANGENTSPACENORMAL
+	case 2: Value.rgb = normalize(TransformVector(GetMaterialNormalRaw(PixelMaterialInputs), Parameters.TangentToWorld)); break;
+#else
+	case 2: Value.rgb = GetMaterialNormalRaw(PixelMaterialInputs); break;
+#endif
+	case 3: Value.r = GetMaterialRoughnessRaw(PixelMaterialInputs); break;
+	case 4: Value.r = GetMaterialMetallicRaw(PixelMaterialInputs); break;
+	}
+
+	StaticMeshParameters.OutData[DispatchThreadID] = Value;
+}

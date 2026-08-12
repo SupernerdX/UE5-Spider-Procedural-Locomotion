@@ -1,0 +1,316 @@
+// Copyright Voxel Plugin SAS, 2026. All Rights Reserved.
+
+#pragma once
+
+#include "VoxelMinimal.isph"
+
+// ReSharper disable CppCStyleCast
+
+FORCEINLINE varying float SampleMeshDistances(
+	varying float LocalPositionX,
+	varying float LocalPositionY,
+	varying float LocalPositionZ,
+	const uniform float MaxPositionX,
+	const uniform float MaxPositionY,
+	const uniform float MaxPositionZ,
+	const uniform int SizeX,
+	const uniform int SizeXY,
+	const uniform int SizeXYZ,
+	const uniform int3& Size,
+	const uniform bool bUseTricubic,
+	const uniform float MeshDistances[])
+{
+	check(min3(Size.x, Size.y, Size.z) >= 2);
+	check(!bUseTricubic || min3(Size.x, Size.y, Size.z) >= 4);
+
+	varying float DistanceOffset = 0.f;
+	DistanceOffset += Square(max(0.f, 1.f - LocalPositionX));
+	DistanceOffset += Square(max(0.f, 1.f - LocalPositionY));
+	DistanceOffset += Square(max(0.f, 1.f - LocalPositionZ));
+	DistanceOffset += Square(max(0.f, LocalPositionX - MaxPositionX));
+	DistanceOffset += Square(max(0.f, LocalPositionY - MaxPositionY));
+	DistanceOffset += Square(max(0.f, LocalPositionZ - MaxPositionZ));
+
+	LocalPositionX = clamp(LocalPositionX, 1.f, MaxPositionX);
+	LocalPositionY = clamp(LocalPositionY, 1.f, MaxPositionY);
+	LocalPositionZ = clamp(LocalPositionZ, 1.f, MaxPositionZ);
+
+	DistanceOffset = sqrt(DistanceOffset);
+
+	check(IsFinite(DistanceOffset));
+
+	const varying float MinXf = floor(LocalPositionX);
+	const varying float MinYf = floor(LocalPositionY);
+	const varying float MinZf = floor(LocalPositionZ);
+
+	const varying float AlphaX = LocalPositionX - MinXf;
+	const varying float AlphaY = LocalPositionY - MinYf;
+	const varying float AlphaZ = LocalPositionZ - MinZf;
+
+	const varying int32 MinX = (int32)MinXf;
+	const varying int32 MinY = (int32)MinYf;
+	const varying int32 MinZ = (int32)MinZf;
+
+	check(1 <= MinX && MinX + 2 < Size.x);
+	check(1 <= MinY && MinY + 2 < Size.y);
+	check(1 <= MinZ && MinZ + 2 < Size.z);
+
+	if (!bUseTricubic)
+	{
+		return DistanceOffset + TrilinearInterpolation(
+			IGNORE_PERF_WARNING
+			MeshDistances[(MinX + 0) + SizeX * (MinY + 0) + SizeXY * (MinZ + 0)],
+			IGNORE_PERF_WARNING
+			MeshDistances[(MinX + 1) + SizeX * (MinY + 0) + SizeXY * (MinZ + 0)],
+			IGNORE_PERF_WARNING
+			MeshDistances[(MinX + 0) + SizeX * (MinY + 1) + SizeXY * (MinZ + 0)],
+			IGNORE_PERF_WARNING
+			MeshDistances[(MinX + 1) + SizeX * (MinY + 1) + SizeXY * (MinZ + 0)],
+			IGNORE_PERF_WARNING
+			MeshDistances[(MinX + 0) + SizeX * (MinY + 0) + SizeXY * (MinZ + 1)],
+			IGNORE_PERF_WARNING
+			MeshDistances[(MinX + 1) + SizeX * (MinY + 0) + SizeXY * (MinZ + 1)],
+			IGNORE_PERF_WARNING
+			MeshDistances[(MinX + 0) + SizeX * (MinY + 1) + SizeXY * (MinZ + 1)],
+			IGNORE_PERF_WARNING
+			MeshDistances[(MinX + 1) + SizeX * (MinY + 1) + SizeXY * (MinZ + 1)],
+			AlphaX,
+			AlphaY,
+			AlphaZ);
+	}
+
+#if 0
+	return DistanceOffset + TricubicInterpolation(
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX - 1) + SizeX * (MinY - 1) + SizeXY * (MinZ - 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 0) + SizeX * (MinY - 1) + SizeXY * (MinZ - 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 1) + SizeX * (MinY - 1) + SizeXY * (MinZ - 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 2) + SizeX * (MinY - 1) + SizeXY * (MinZ - 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX - 1) + SizeX * (MinY + 0) + SizeXY * (MinZ - 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 0) + SizeX * (MinY + 0) + SizeXY * (MinZ - 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 1) + SizeX * (MinY + 0) + SizeXY * (MinZ - 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 2) + SizeX * (MinY + 0) + SizeXY * (MinZ - 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX - 1) + SizeX * (MinY + 1) + SizeXY * (MinZ - 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 0) + SizeX * (MinY + 1) + SizeXY * (MinZ - 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 1) + SizeX * (MinY + 1) + SizeXY * (MinZ - 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 2) + SizeX * (MinY + 1) + SizeXY * (MinZ - 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX - 1) + SizeX * (MinY + 2) + SizeXY * (MinZ - 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 0) + SizeX * (MinY + 2) + SizeXY * (MinZ - 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 1) + SizeX * (MinY + 2) + SizeXY * (MinZ - 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 2) + SizeX * (MinY + 2) + SizeXY * (MinZ - 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX - 1) + SizeX * (MinY - 1) + SizeXY * (MinZ + 0)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 0) + SizeX * (MinY - 1) + SizeXY * (MinZ + 0)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 1) + SizeX * (MinY - 1) + SizeXY * (MinZ + 0)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 2) + SizeX * (MinY - 1) + SizeXY * (MinZ + 0)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX - 1) + SizeX * (MinY + 0) + SizeXY * (MinZ + 0)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 0) + SizeX * (MinY + 0) + SizeXY * (MinZ + 0)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 1) + SizeX * (MinY + 0) + SizeXY * (MinZ + 0)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 2) + SizeX * (MinY + 0) + SizeXY * (MinZ + 0)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX - 1) + SizeX * (MinY + 1) + SizeXY * (MinZ + 0)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 0) + SizeX * (MinY + 1) + SizeXY * (MinZ + 0)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 1) + SizeX * (MinY + 1) + SizeXY * (MinZ + 0)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 2) + SizeX * (MinY + 1) + SizeXY * (MinZ + 0)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX - 1) + SizeX * (MinY + 2) + SizeXY * (MinZ + 0)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 0) + SizeX * (MinY + 2) + SizeXY * (MinZ + 0)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 1) + SizeX * (MinY + 2) + SizeXY * (MinZ + 0)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 2) + SizeX * (MinY + 2) + SizeXY * (MinZ + 0)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX - 1) + SizeX * (MinY - 1) + SizeXY * (MinZ + 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 0) + SizeX * (MinY - 1) + SizeXY * (MinZ + 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 1) + SizeX * (MinY - 1) + SizeXY * (MinZ + 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 2) + SizeX * (MinY - 1) + SizeXY * (MinZ + 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX - 1) + SizeX * (MinY + 0) + SizeXY * (MinZ + 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 0) + SizeX * (MinY + 0) + SizeXY * (MinZ + 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 1) + SizeX * (MinY + 0) + SizeXY * (MinZ + 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 2) + SizeX * (MinY + 0) + SizeXY * (MinZ + 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX - 1) + SizeX * (MinY + 1) + SizeXY * (MinZ + 0)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 0) + SizeX * (MinY + 1) + SizeXY * (MinZ + 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 1) + SizeX * (MinY + 1) + SizeXY * (MinZ + 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 2) + SizeX * (MinY + 1) + SizeXY * (MinZ + 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX - 1) + SizeX * (MinY + 2) + SizeXY * (MinZ + 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 0) + SizeX * (MinY + 2) + SizeXY * (MinZ + 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 1) + SizeX * (MinY + 2) + SizeXY * (MinZ + 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 2) + SizeX * (MinY + 2) + SizeXY * (MinZ + 1)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX - 1) + SizeX * (MinY - 1) + SizeXY * (MinZ + 2)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 0) + SizeX * (MinY - 1) + SizeXY * (MinZ + 2)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 1) + SizeX * (MinY - 1) + SizeXY * (MinZ + 2)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 2) + SizeX * (MinY - 1) + SizeXY * (MinZ + 2)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX - 1) + SizeX * (MinY + 0) + SizeXY * (MinZ + 2)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 0) + SizeX * (MinY + 0) + SizeXY * (MinZ + 2)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 1) + SizeX * (MinY + 0) + SizeXY * (MinZ + 2)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 2) + SizeX * (MinY + 0) + SizeXY * (MinZ + 2)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX - 1) + SizeX * (MinY + 1) + SizeXY * (MinZ + 2)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 0) + SizeX * (MinY + 1) + SizeXY * (MinZ + 2)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 1) + SizeX * (MinY + 1) + SizeXY * (MinZ + 2)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 2) + SizeX * (MinY + 1) + SizeXY * (MinZ + 2)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX - 1) + SizeX * (MinY + 2) + SizeXY * (MinZ + 2)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 0) + SizeX * (MinY + 2) + SizeXY * (MinZ + 2)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 1) + SizeX * (MinY + 2) + SizeXY * (MinZ + 2)],
+		IGNORE_PERF_WARNING
+		MeshDistances[(MinX + 2) + SizeX * (MinY + 2) + SizeXY * (MinZ + 2)],
+		AlphaX,
+		AlphaY,
+		AlphaZ);
+#endif
+
+	const varying float p0_Y_MultiplierVector = ((-0.5f * AlphaY + 1.0f) * AlphaY - 0.5f) * AlphaY + 0.0f;
+	const varying float p1_Y_MultiplierVector = ((+1.5f * AlphaY - 2.5f) * AlphaY - 0.0f) * AlphaY + 1.0f;
+	const varying float p2_Y_MultiplierVector = ((-1.5f * AlphaY + 2.0f) * AlphaY + 0.5f) * AlphaY + 0.0f;
+	const varying float p3_Y_MultiplierVector = ((+0.5f * AlphaY - 0.5f) * AlphaY + 0.0f) * AlphaY + 0.0f;
+
+	const varying float p0_Z_MultiplierVector = ((-0.5f * AlphaZ + 1.0f) * AlphaZ - 0.5f) * AlphaZ + 0.0f;
+	const varying float p1_Z_MultiplierVector = ((+1.5f * AlphaZ - 2.5f) * AlphaZ - 0.0f) * AlphaZ + 1.0f;
+	const varying float p2_Z_MultiplierVector = ((-1.5f * AlphaZ + 2.0f) * AlphaZ + 0.5f) * AlphaZ + 0.0f;
+	const varying float p3_Z_MultiplierVector = ((+0.5f * AlphaZ - 0.5f) * AlphaZ + 0.0f) * AlphaZ + 0.0f;
+
+	const varying int32 BaseIndexVector = (MinX - 1) + SizeX * (MinY - 1) + SizeXY * (MinZ - 1);
+
+	varying float Result;
+
+	// Read the current active lanes
+	const uniform int64 LaneMask = lanemask_unsafe();
+
+	// Reset active lanes
+	unmasked_unsafe
+	{
+		UNROLL_N(TARGET_WIDTH)
+		for (uniform int32 Lane = 0; Lane < programCount; Lane++)
+		{
+			if (!(LaneMask & (1u << Lane)))
+			{
+				continue;
+			}
+
+			const uniform int32 BaseIndex = extract(BaseIndexVector, Lane);
+			const uniform int32 LaneMinX = extract(MinX, Lane);
+			const uniform int32 LaneMinY = extract(MinY, Lane);
+			const uniform int32 LaneMinZ = extract(MinZ, Lane);
+			const uniform float LaneAlphaX = extract(AlphaX, Lane);
+			const uniform float p0_Y_Multiplier = extract(p0_Y_MultiplierVector, Lane);
+			const uniform float p1_Y_Multiplier = extract(p1_Y_MultiplierVector, Lane);
+			const uniform float p2_Y_Multiplier = extract(p2_Y_MultiplierVector, Lane);
+			const uniform float p3_Y_Multiplier = extract(p3_Y_MultiplierVector, Lane);
+			const uniform float p0_Z_Multiplier = extract(p0_Z_MultiplierVector, Lane);
+			const uniform float p1_Z_Multiplier = extract(p1_Z_MultiplierVector, Lane);
+			const uniform float p2_Z_Multiplier = extract(p2_Z_MultiplierVector, Lane);
+			const uniform float p3_Z_Multiplier = extract(p3_Z_MultiplierVector, Lane);
+
+			check(0 <= LaneMinX - 1 && LaneMinX + 2 < Size.x);
+			check(0 <= LaneMinY - 1 && LaneMinY + 2 < Size.y);
+			check(0 <= LaneMinZ - 1 && LaneMinZ + 2 < Size.z);
+
+			check(BaseIndex + 2 * SizeX + 3 * SizeXY + TARGET_WIDTH <= SizeXYZ);
+#if TARGET_WIDTH == 8
+			check(BaseIndex + 3 * SizeX + 3 * SizeXY - 4 + TARGET_WIDTH <= SizeXYZ);
+#elif TARGET_WIDTH == 4
+			check(BaseIndex + 3 * SizeX + 3 * SizeXY + TARGET_WIDTH <= SizeXYZ);
+#endif
+
+			const varying float A = MakeRegister4_ZeroPadded(+0.0f, +1.0f, +0.0f, +0.0f);
+			const varying float B = MakeRegister4_ZeroPadded(-0.5f, -0.0f, +0.5f, +0.0f);
+			const varying float C = MakeRegister4_ZeroPadded(+1.0f, -2.5f, +2.0f, -0.5f);
+			const varying float D = MakeRegister4_ZeroPadded(-0.5f, +1.5f, -1.5f, +0.5f);
+
+			const varying float p0123_X_Multiplier = A + LaneAlphaX * (B + LaneAlphaX * (C + LaneAlphaX * D));
+
+			check(BaseIndex + 2 * SizeX + 3 * SizeXY + TARGET_WIDTH <= SizeXYZ);
+			check(BaseIndex + 3 * SizeX + 3 * SizeXY - 4 + TARGET_WIDTH <= SizeXYZ);
+
+			const uniform float Value = reduce_add(
+				p0123_X_Multiplier * (
+					p0_Z_Multiplier * (
+						p0_Y_Multiplier * MeshDistances[BaseIndex + 0 * SizeX + 0 * SizeXY + programIndex] +
+						p1_Y_Multiplier * MeshDistances[BaseIndex + 1 * SizeX + 0 * SizeXY + programIndex] +
+						p2_Y_Multiplier * MeshDistances[BaseIndex + 2 * SizeX + 0 * SizeXY + programIndex] +
+						p3_Y_Multiplier * MeshDistances[BaseIndex + 3 * SizeX + 0 * SizeXY + programIndex]) +
+
+					p1_Z_Multiplier * (
+						p0_Y_Multiplier * MeshDistances[BaseIndex + 0 * SizeX + 1 * SizeXY + programIndex] +
+						p1_Y_Multiplier * MeshDistances[BaseIndex + 1 * SizeX + 1 * SizeXY + programIndex] +
+						p2_Y_Multiplier * MeshDistances[BaseIndex + 2 * SizeX + 1 * SizeXY + programIndex] +
+						p3_Y_Multiplier * MeshDistances[BaseIndex + 3 * SizeX + 1 * SizeXY + programIndex]) +
+
+					p2_Z_Multiplier * (
+						p0_Y_Multiplier * MeshDistances[BaseIndex + 0 * SizeX + 2 * SizeXY + programIndex] +
+						p1_Y_Multiplier * MeshDistances[BaseIndex + 1 * SizeX + 2 * SizeXY + programIndex] +
+						p2_Y_Multiplier * MeshDistances[BaseIndex + 2 * SizeX + 2 * SizeXY + programIndex] +
+						p3_Y_Multiplier * MeshDistances[BaseIndex + 3 * SizeX + 2 * SizeXY + programIndex]) +
+
+					p3_Z_Multiplier * (
+						p0_Y_Multiplier * MeshDistances[BaseIndex + 0 * SizeX + 3 * SizeXY + programIndex] +
+						p1_Y_Multiplier * MeshDistances[BaseIndex + 1 * SizeX + 3 * SizeXY + programIndex] +
+						p2_Y_Multiplier * MeshDistances[BaseIndex + 2 * SizeX + 3 * SizeXY + programIndex] +
+#if TARGET_WIDTH == 8
+						// Don't access out of bounds
+						p3_Y_Multiplier * rotate(MeshDistances[BaseIndex + 3 * SizeX + 3 * SizeXY - 4 + programIndex], 4))));
+#elif TARGET_WIDTH == 4
+						p3_Y_Multiplier * MeshDistances[BaseIndex + 3 * SizeX + 3 * SizeXY + programIndex])));
+#endif
+
+			Result = insert(Result, Lane, Value);
+		}
+	}
+
+	return DistanceOffset + Result;
+}

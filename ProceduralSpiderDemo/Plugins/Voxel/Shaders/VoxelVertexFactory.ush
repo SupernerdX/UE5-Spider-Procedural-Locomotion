@@ -1,0 +1,446 @@
+// Copyright Voxel Plugin SAS, 2026. All Rights Reserved.
+
+#include "Common.ush"
+#include "VoxelDisplacement.ush"
+#include "/Engine/Private/VertexFactoryCommon.ush"
+#if RAYHITGROUPSHADER
+#include "/Engine/Private/RayTracing/RayTracingCommon.ush"
+#include "/Engine/Private/RayTracing/RayTracingHitGroupCommon.ush"
+#endif
+
+#if INTELLISENSE_PARSER
+struct
+{
+	int VoxelDebugMode;
+
+	Buffer<float4> Vertices;
+	Buffer<float2> Normals;
+	Buffer<uint> Indices;
+
+	int ChunkIndicesIndex;
+
+	Texture2D ChunkIndices_Texture;
+	int ChunkIndices_TextureSizeLog2;
+
+	Texture2D<uint4> Materials_Texture;
+	int Materials_TextureSizeLog2;
+} VoxelVertexFactory;
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+struct FVertexFactoryInput
+{
+	uint VertexId : SV_VertexID;
+	VF_GPUSCENE_DECLARE_INPUT_BLOCK(0)
+};
+
+// Position only / Position & Normal are used for optimized depth/shadow passes
+#define FPositionOnlyVertexFactoryInput FVertexFactoryInput
+#define FPositionAndNormalOnlyVertexFactoryInput FVertexFactoryInput
+
+struct FVertexFactoryIntermediates
+{
+	FSceneDataIntermediates SceneData;
+	float3 Position;
+	float3 Normal;
+};
+
+struct FVertexFactoryInterpolantsVSToPS
+{
+	float3 VoxPosition : VOXEL_POSITION;
+	float3 Normal : VOXEL_NORMAL;
+
+#if VF_USE_PRIMITIVE_SCENE_DATA
+	nointerpolation uint PrimitiveId : PRIMITIVE_ID;
+#endif
+#if INSTANCED_STEREO
+	nointerpolation uint EyeIndex : PACKED_EYE_INDEX;
+#endif
+
+#if NUM_TEX_COORD_INTERPOLATORS
+	float4 TexCoords[(NUM_TEX_COORD_INTERPOLATORS + 1) / 2] : TEXCOORD0;
+#endif
+
+#if PIXELSHADER
+#if !COMPILER_PSSL
+	uint TriangleIndex : SV_PrimitiveID;
+#endif
+#if WITH_BARYCENTRICS
+	float3 Barycentrics : SV_Barycentrics;
+#endif
+#else
+#if !COMPILER_METAL
+	uint DUMMY_TriangleIndex : DUMMY_PrimitiveID;
+#endif
+#endif
+};
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+#if NUM_TEX_COORD_INTERPOLATORS
+float2 GetUV(const FVertexFactoryInterpolantsVSToPS Interpolants, const int UVIndex)
+{
+	float4 UVVector = Interpolants.TexCoords[UVIndex / 2];
+	return UVIndex % 2 ? UVVector.zw : UVVector.xy;
+}
+
+void SetUV(inout FVertexFactoryInterpolantsVSToPS Interpolants, const int UVIndex, const float2 InValue)
+{
+	FLATTEN
+	if (UVIndex % 2)
+	{
+		Interpolants.TexCoords[UVIndex / 2].zw = InValue;
+	}
+	else
+	{
+		Interpolants.TexCoords[UVIndex / 2].xy = InValue;
+	}
+}
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+uint VertexFactoryGetPrimitiveId(const FVertexFactoryInterpolantsVSToPS Interpolants)
+{
+#if VF_USE_PRIMITIVE_SCENE_DATA
+	return Interpolants.PrimitiveId;
+#else
+	return 0;
+#endif
+}
+
+float4 VertexFactoryGetTranslatedPrimitiveVolumeBounds(const FVertexFactoryInterpolantsVSToPS Interpolants)
+{
+	const FPrimitiveSceneData PrimitiveData = GetPrimitiveData(VertexFactoryGetPrimitiveId(Interpolants));
+	return float4(LWCToFloat(LWCAdd(PrimitiveData.ObjectWorldPosition, ResolvedView.PreViewTranslation)), PrimitiveData.ObjectRadius);
+}
+
+FVertexFactoryIntermediates GetVertexFactoryIntermediates(const FVertexFactoryInput Input)
+{
+	FVertexFactoryIntermediates Intermediates = (FVertexFactoryIntermediates)0;
+	Intermediates.SceneData = VF_GPUSCENE_GET_INTERMEDIATES(Input);
+	Intermediates.Position = VoxelVertexFactory.Vertices[Input.VertexId].xyz;
+	Intermediates.Normal = OctahedronToUnitVector(VoxelVertexFactory.Normals[Input.VertexId] * 2.f - 1.f);
+	return Intermediates;
+}
+
+FVertexFactoryInterpolantsVSToPS VertexFactoryGetInterpolantsVSToPS(const FVertexFactoryInput Input, const FVertexFactoryIntermediates Intermediates, const FMaterialVertexParameters VertexParameters)
+{
+	FVertexFactoryInterpolantsVSToPS Interpolants = (FVertexFactoryInterpolantsVSToPS)0;
+	Interpolants.VoxPosition = Intermediates.Position;
+	Interpolants.Normal = Intermediates.Normal;
+#if VF_USE_PRIMITIVE_SCENE_DATA
+	Interpolants.PrimitiveId = Intermediates.SceneData.PrimitiveId;
+#endif
+
+#if NUM_TEX_COORD_INTERPOLATORS
+	float2 CustomizedUVs[NUM_TEX_COORD_INTERPOLATORS];
+	GetMaterialCustomizedUVs(VertexParameters, CustomizedUVs);
+	GetCustomInterpolators(VertexParameters, CustomizedUVs);
+
+	UNROLL
+	for (int CoordinateIndex = 0; CoordinateIndex < NUM_TEX_COORD_INTERPOLATORS; CoordinateIndex++)
+	{
+		SetUV(Interpolants, CoordinateIndex, CustomizedUVs[CoordinateIndex]);
+	}
+#endif
+
+	return Interpolants;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+FMaterialVertexParameters GetMaterialVertexParameters(const FVertexFactoryInput Input, const FVertexFactoryIntermediates Intermediates, const float3 WorldPosition, const half3x3 InTangentToLocal, bool bIsPreviousFrame = false)
+{
+	FMaterialVertexParameters Parameters = MakeInitializedMaterialVertexParameters();
+	Parameters.SceneData = Intermediates.SceneData;
+	Parameters.WorldPosition = WorldPosition;
+	Parameters.PreSkinnedPosition = WorldPosition;
+	Parameters.PreSkinnedNormal = InTangentToLocal[2];
+	Parameters.LWCData = MakeMaterialLWCData(Parameters);
+
+	{
+		const float3 Normal = Intermediates.Normal;
+
+		const float3 TangentX = abs(Normal.x) > 0.99f ? float3(0, 1, 0) : float3(1, 0, 0);
+		const float3 TangentZ = Normal;
+		const float3 TangentY = cross(TangentZ, TangentX);
+
+		float3x3 TangentToLocal;
+		TangentToLocal[0] = normalize(cross(TangentY, TangentZ));
+		TangentToLocal[1] = normalize(TangentY);
+		TangentToLocal[2] = normalize(TangentZ);
+
+		float3x3 TangentToWorld = mul(TangentToLocal, GetLocalToWorld3x3(Parameters));
+		TangentToWorld[0] = normalize(TangentToWorld[0]);
+		TangentToWorld[1] = normalize(TangentToWorld[1]);
+		TangentToWorld[2] = normalize(TangentToWorld[2]);
+
+		Parameters.TangentToWorld = TangentToWorld;
+	}
+
+	const int MaterialOffset = GetVoxelAttributeOffset(
+		VoxelVertexFactory.ChunkIndicesIndex,
+		VoxelVertexFactory.ChunkIndices_Texture,
+		VoxelVertexFactory.ChunkIndices_TextureSizeLog2,
+		0);
+
+#if MATERIAL_VERTEX_PARAMETERS_VOXEL_VERSION == 6
+	UnpackVoxelMaterial(
+		asuint(VoxelVertexFactory.Materials_Texture[GetTextureIndex_Log2(MaterialOffset + Input.VertexId, VoxelVertexFactory.Materials_TextureSizeLog2)].rgba),
+		Parameters.Voxel_LayerMask,
+		Parameters.Voxel_LayerWeights);
+
+	Parameters.Voxel_DebugMode = VoxelVertexFactory.VoxelDebugMode;
+	Parameters.Voxel_ChunkIndicesIndex = VoxelVertexFactory.ChunkIndicesIndex;
+	Parameters.Voxel_VertexIndexInChunk = Input.VertexId;
+#endif
+
+	return Parameters;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+FMaterialPixelParameters GetMaterialPixelParameters(const FVertexFactoryInterpolantsVSToPS Interpolants, const float4 SvPosition)
+{
+	FMaterialPixelParameters Parameters = MakeInitializedMaterialPixelParameters();
+	Parameters.PrimitiveId = VertexFactoryGetPrimitiveId(Interpolants);
+	Parameters.TwoSidedSign = 1;
+	Parameters.UnMirrored = 1;
+
+	const FPrimitiveSceneData PrimitiveData = GetPrimitiveData(Parameters);
+
+#if NUM_TEX_COORD_INTERPOLATORS
+	UNROLL
+	for (int CoordinateIndex = 0; CoordinateIndex < NUM_TEX_COORD_INTERPOLATORS; CoordinateIndex++)
+	{
+		Parameters.TexCoords[CoordinateIndex] = GetUV(Interpolants, CoordinateIndex);
+	}
+#endif
+
+	{
+		float3x3 LocalToWorldNoScale = DFToFloat3x3(PrimitiveData.LocalToWorld);
+		LocalToWorldNoScale[0] *= PrimitiveData.InvNonUniformScale.x;
+		LocalToWorldNoScale[1] *= PrimitiveData.InvNonUniformScale.y;
+		LocalToWorldNoScale[2] *= PrimitiveData.InvNonUniformScale.z;
+
+		const float3 TangentZ = normalize(Interpolants.Normal);
+
+		// Same logic as GetAttributeData in NaniteAttributeDecode.ush
+		const float Sign = TangentZ.z >= 0 ? 1 : -1;
+		const float a = -rcp(Sign + TangentZ.z);
+		const float b = TangentZ.x * TangentZ.y * a;
+		float3 TangentX = float3(1 + Sign * a * Pow2(TangentZ.x), Sign * b, -Sign * TangentZ.x);
+		float3 TangentY = float3(b, Sign + a * Pow2(TangentZ.y), -TangentZ.y);
+		float3x3 TangentToLocal = float3x3(TangentX, TangentY, TangentZ);
+
+		Parameters.WorldNormal = TransformVector(TangentZ, LocalToWorldNoScale);
+		Parameters.TangentToWorld = mul(TangentToLocal, LocalToWorldNoScale);
+	}
+
+	Parameters.WorldPosition_CamRelative = SvPositionToResolvedTranslatedWorld(SvPosition);
+	Parameters.WorldPosition_NoOffsets_CamRelative = SvPositionToResolvedTranslatedWorld(SvPosition);
+	Parameters.AbsoluteWorldPosition = TransformLocalToWorld(Interpolants.VoxPosition, GetLocalToWorldDF(Parameters));
+	Parameters.LWCData = MakeMaterialLWCData(Parameters);
+
+#if RAYHITGROUPSHADER
+	const uint TriangleIndex = PrimitiveIndex();
+#elif COMPILER_PSSL
+	const uint TriangleIndex = Interpolants.PrimitiveId;
+#else
+	const uint TriangleIndex = Interpolants.TriangleIndex;
+#endif
+
+	const uint IndexU = VoxelVertexFactory.Indices[3 * TriangleIndex + 0];
+	const uint IndexV = VoxelVertexFactory.Indices[3 * TriangleIndex + 1];
+	const uint IndexW = VoxelVertexFactory.Indices[3 * TriangleIndex + 2];
+
+	const int MaterialOffset = GetVoxelAttributeOffset(
+		VoxelVertexFactory.ChunkIndicesIndex,
+		VoxelVertexFactory.ChunkIndices_Texture,
+		VoxelVertexFactory.ChunkIndices_TextureSizeLog2,
+		0);
+
+	const uint4 MaterialU = asuint(VoxelVertexFactory.Materials_Texture[GetTextureIndex_Log2(MaterialOffset + IndexU, VoxelVertexFactory.Materials_TextureSizeLog2)].rgba);
+	const uint4 MaterialV = asuint(VoxelVertexFactory.Materials_Texture[GetTextureIndex_Log2(MaterialOffset + IndexV, VoxelVertexFactory.Materials_TextureSizeLog2)].rgba);
+	const uint4 MaterialW = asuint(VoxelVertexFactory.Materials_Texture[GetTextureIndex_Log2(MaterialOffset + IndexW, VoxelVertexFactory.Materials_TextureSizeLog2)].rgba);
+
+#if WITH_BARYCENTRICS && !RAYHITGROUPSHADER
+	const float3 Barycentrics = Interpolants.Barycentrics;
+#else
+	const float3 Barycentrics = float3(1.f / 3.f, 1.f / 3.f, 1.f / 3.f);
+#endif
+
+#if MATERIAL_PIXEL_PARAMETERS_VOXEL_VERSION == 8
+	GetVoxelMaterialLayers(
+		Barycentrics,
+		MaterialU,
+		MaterialV,
+		MaterialW,
+		Parameters.Voxel_LayerMask,
+		Parameters.Voxel_LayerWeights);
+
+	const float3 VertexU = VoxelVertexFactory.Vertices[IndexU].rgb;
+	const float3 VertexV = VoxelVertexFactory.Vertices[IndexV].rgb;
+	const float3 VertexW = VoxelVertexFactory.Vertices[IndexW].rgb;
+
+	Parameters.Voxel_DebugMode = VoxelVertexFactory.VoxelDebugMode;
+	Parameters.Voxel_Barycentrics = Barycentrics;
+	Parameters.Voxel_ChunkIndicesIndex = VoxelVertexFactory.ChunkIndicesIndex;
+	Parameters.Voxel_VertexIndicesInChunk = int3(IndexU, IndexV, IndexW);
+	Parameters.Voxel_FlatNormal = normalize(cross(VertexW - VertexU, VertexV - VertexU));
+#endif
+
+	return Parameters;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+half3x3 VertexFactoryGetTangentToLocal(const FVertexFactoryInput Input, const FVertexFactoryIntermediates Intermediates)
+{
+	return half3x3(1, 0, 0, 0, 1, 0, 0, 0, 1);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+float4 VertexFactoryGetWorldPosition(const FVertexFactoryInput Input, const FVertexFactoryIntermediates Intermediates)
+{
+	return TransformLocalToTranslatedWorld(Intermediates.Position, Intermediates.SceneData.InstanceData.LocalToWorld);
+}
+float4 VertexFactoryGetWorldPosition(const FPositionOnlyVertexFactoryInput Input)
+{
+	return TransformLocalToTranslatedWorld(VoxelVertexFactory.Vertices[Input.VertexId].xyz, VF_GPUSCENE_GET_INTERMEDIATES(Input).InstanceData.LocalToWorld);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+float3 VertexFactoryGetWorldNormal(const FVertexFactoryInput Input, const FVertexFactoryIntermediates Intermediates)
+{
+	const FPrimitiveSceneData PrimitiveData = VF_GPUSCENE_GET_INTERMEDIATES(Input).Primitive;
+	return RotateLocalToWorld(Intermediates.Normal, PrimitiveData.LocalToWorld, PrimitiveData.InvNonUniformScale);
+}
+float3 VertexFactoryGetWorldNormal(const FPositionAndNormalOnlyVertexFactoryInput Input)
+{
+	const FPrimitiveSceneData PrimitiveData = VF_GPUSCENE_GET_INTERMEDIATES(Input).Primitive;
+	return RotateLocalToWorld(OctahedronToUnitVector(VoxelVertexFactory.Normals[Input.VertexId] * 2.f - 1.f), PrimitiveData.LocalToWorld, PrimitiveData.InvNonUniformScale);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+float4 VertexFactoryGetRasterizedWorldPosition(const FVertexFactoryInput Input, const FVertexFactoryIntermediates Intermediates, const float4 InWorldPosition)
+{
+	return InWorldPosition;
+}
+float3 VertexFactoryGetPositionForVertexLighting(const FVertexFactoryInput Input, const FVertexFactoryIntermediates Intermediates, const float3 TranslatedWorldPosition)
+{
+	return TranslatedWorldPosition;
+}
+
+float4 VertexFactoryGetPreviousWorldPosition(const FVertexFactoryInput Input, const FVertexFactoryIntermediates Intermediates)
+{
+    return mul(float4(Intermediates.Position, 1), DFMultiplyTranslationDemote(Intermediates.SceneData.InstanceData.PrevLocalToWorld, ResolvedView.PrevPreViewTranslation));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+#if RAYHITGROUPSHADER
+FVertexFactoryInput LoadVertexFactoryInputForHGS(uint TriangleIndex, int VertexIndex)
+{
+	FVertexFactoryInput Input = (FVertexFactoryInput)0;
+
+	FTriangleBaseAttributes Tri = LoadTriangleBaseAttributes(TriangleIndex);
+
+	Input.VertexId = Tri.Indices[VertexIndex];
+
+#if VF_USE_PRIMITIVE_SCENE_DATA
+	VF_GPUSCENE_SET_INPUT_FOR_RT(Input, GetInstanceUserData(), 0U);
+#endif
+
+	return Input;
+}
+#endif
+
+#if NEEDS_VERTEX_FACTORY_INTERPOLATION
+struct FVertexFactoryRayTracingInterpolants
+{
+    FVertexFactoryInterpolantsVSToPS InterpolantsVSToPS;
+};
+
+float2 VertexFactoryGetRayTracingTextureCoordinate( FVertexFactoryRayTracingInterpolants Interpolants )
+{
+#if NUM_MATERIAL_TEXCOORDS
+    return Interpolants.InterpolantsVSToPS.TexCoords[0].xy;
+#else
+    return float2(0,0);
+#endif
+}
+
+FVertexFactoryInterpolantsVSToPS VertexFactoryAssignInterpolants(FVertexFactoryRayTracingInterpolants Input)
+{
+	return Input.InterpolantsVSToPS;
+}
+
+FVertexFactoryRayTracingInterpolants VertexFactoryGetRayTracingInterpolants(FVertexFactoryInput Input, FVertexFactoryIntermediates Intermediates, FMaterialVertexParameters VertexParameters)
+{
+    FVertexFactoryRayTracingInterpolants Interpolants;
+    Interpolants.InterpolantsVSToPS = VertexFactoryGetInterpolantsVSToPS(Input, Intermediates, VertexParameters);
+    return Interpolants;
+}
+
+FVertexFactoryRayTracingInterpolants VertexFactoryInterpolate(FVertexFactoryRayTracingInterpolants a, float aInterp, FVertexFactoryRayTracingInterpolants b, float bInterp)
+{
+	FVertexFactoryRayTracingInterpolants O;
+
+	INTERPOLATE_MEMBER(InterpolantsVSToPS.VoxPosition);
+	INTERPOLATE_MEMBER(InterpolantsVSToPS.Normal);
+
+#if NUM_TEX_COORD_INTERPOLATORS
+	UNROLL
+	for (int tc = 0; tc < (NUM_TEX_COORD_INTERPOLATORS + 1) / 2; ++tc)
+	{
+		INTERPOLATE_MEMBER(InterpolantsVSToPS.TexCoords[tc]);
+	}
+#endif
+
+#if VF_USE_PRIMITIVE_SCENE_DATA
+	O.InterpolantsVSToPS.PrimitiveId = a.InterpolantsVSToPS.PrimitiveId;
+#endif
+
+	return O;
+}
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+struct FVertexFactoryInputDummy
+{
+	VF_GPUSCENE_DECLARE_INPUT_BLOCK(0)
+};
+#undef FPositionAndNormalOnlyVertexFactoryInput
+#define FPositionAndNormalOnlyVertexFactoryInput FVertexFactoryInputDummy
+#include "/Engine/Private/VertexFactoryDefaultInterface.ush"
+#undef FPositionAndNormalOnlyVertexFactoryInput
+#define FPositionAndNormalOnlyVertexFactoryInput FVertexFactoryInput

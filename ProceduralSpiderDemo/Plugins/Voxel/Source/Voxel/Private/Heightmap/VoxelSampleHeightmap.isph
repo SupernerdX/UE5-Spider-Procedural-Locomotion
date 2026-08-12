@@ -1,0 +1,110 @@
+// Copyright Voxel Plugin SAS, 2026. All Rights Reserved.
+
+// ReSharper disable CppCStyleCast
+// ReSharper disable CppVariableCanBeMadeConstexpr
+// ReSharper disable CppUE4CodingStandardNamingViolationWarning
+
+#include "VoxelMinimal.isph"
+
+FORCEINLINE varying float SampleHeightmap(
+	const uniform bool bUseBicubic,
+	const uniform int32 SizeX,
+	const uniform int32 SizeY,
+	const uniform Type Heightmap[],
+	const varying float2 Position)
+{
+	const varying float MinXf = floor(Position.x);
+	const varying float MinYf = floor(Position.y);
+
+	const varying float AlphaX = clamp(Position.x - MinXf, 0.f, 1.f);
+	const varying float AlphaY = clamp(Position.y - MinYf, 0.f, 1.f);
+
+	const varying int32 MinX = (int32)MinXf;
+	const varying int32 MinY = (int32)MinYf;
+
+	if (!bUseBicubic)
+	{
+		return BilinearInterpolation(
+			IGNORE_PERF_WARNING
+			Heightmap[(MinX + 0) + SizeX * (MinY + 0)],
+			IGNORE_PERF_WARNING
+			Heightmap[(MinX + 1) + SizeX * (MinY + 0)],
+			IGNORE_PERF_WARNING
+			Heightmap[(MinX + 0) + SizeX * (MinY + 1)],
+			IGNORE_PERF_WARNING
+			Heightmap[(MinX + 1) + SizeX * (MinY + 1)],
+			AlphaX,
+			AlphaY);
+	}
+
+	const varying float p0_Y_MultiplierVector = ((-0.5f * AlphaY + 1.0f) * AlphaY - 0.5f) * AlphaY + 0.0f;
+	const varying float p1_Y_MultiplierVector = ((+1.5f * AlphaY - 2.5f) * AlphaY - 0.0f) * AlphaY + 1.0f;
+	const varying float p2_Y_MultiplierVector = ((-1.5f * AlphaY + 2.0f) * AlphaY + 0.5f) * AlphaY + 0.0f;
+	const varying float p3_Y_MultiplierVector = ((+0.5f * AlphaY - 0.5f) * AlphaY + 0.0f) * AlphaY + 0.0f;
+
+	const varying int32 BaseIndexVector = (MinX - 1) + SizeX * (MinY - 1);
+
+	varying float Result;
+
+	// Read the current active lanes
+	const uniform int64 LaneMask = lanemask_unsafe();
+
+	// Reset active lanes
+	unmasked_unsafe
+	{
+		UNROLL_N(TARGET_WIDTH)
+		for (uniform int32 Lane = 0; Lane < programCount; Lane++)
+		{
+			if (!(LaneMask & (1u << Lane)))
+			{
+				continue;
+			}
+
+			const uniform int32 BaseIndex = extract(BaseIndexVector, Lane);
+			const uniform int32 LaneMinX = extract(MinX, Lane);
+			const uniform int32 LaneMinY = extract(MinY, Lane);
+			const uniform float LaneAlphaX = extract(AlphaX, Lane);
+			const uniform float p0_Y_Multiplier = extract(p0_Y_MultiplierVector, Lane);
+			const uniform float p1_Y_Multiplier = extract(p1_Y_MultiplierVector, Lane);
+			const uniform float p2_Y_Multiplier = extract(p2_Y_MultiplierVector, Lane);
+			const uniform float p3_Y_Multiplier = extract(p3_Y_MultiplierVector, Lane);
+
+			check(0 <= LaneMinX - 1 && LaneMinX + 2 < SizeX);
+			check(0 <= LaneMinY - 1 && LaneMinY + 2 < SizeY);
+			check(BaseIndex + 2 * SizeX + TARGET_WIDTH <= SizeX * SizeY);
+#if TARGET_WIDTH == 8
+			check(BaseIndex + 3 * SizeX - 4 + TARGET_WIDTH <= SizeX * SizeY);
+#elif TARGET_WIDTH == 4
+			check(BaseIndex + 3 * SizeX + TARGET_WIDTH <= SizeX * SizeY);
+#endif
+
+			const varying float p0 = Heightmap[BaseIndex + 0 * SizeX + programIndex];
+			const varying float p1 = Heightmap[BaseIndex + 1 * SizeX + programIndex];
+			const varying float p2 = Heightmap[BaseIndex + 2 * SizeX + programIndex];
+#if TARGET_WIDTH == 8
+			// Don't access out of bounds
+			const varying float p3 = rotate((float)(Heightmap[BaseIndex + 3 * SizeX - 4 + programIndex]), 4);
+#elif TARGET_WIDTH == 4
+			const varying float p3 = Heightmap[BaseIndex + 3 * SizeX + programIndex];
+#endif
+
+			const varying float A = MakeRegister4_ZeroPadded(+0.0f, +1.0f, +0.0f, +0.0f);
+			const varying float B = MakeRegister4_ZeroPadded(-0.5f, -0.0f, +0.5f, +0.0f);
+			const varying float C = MakeRegister4_ZeroPadded(+1.0f, -2.5f, +2.0f, -0.5f);
+			const varying float D = MakeRegister4_ZeroPadded(-0.5f, +1.5f, -1.5f, +0.5f);
+
+			const varying float p0123_X_Multiplier = A + LaneAlphaX * (B + LaneAlphaX * (C + LaneAlphaX * D));
+
+			const uniform float Value = reduce_add(
+				p0123_X_Multiplier * (
+					p0_Y_Multiplier * p0 +
+					p1_Y_Multiplier * p1 +
+					p2_Y_Multiplier * p2 +
+					p3_Y_Multiplier * p3));
+
+			Result = insert(Result, Lane, Value);
+		}
+	}
+
+	return Result;
+}

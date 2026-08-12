@@ -1,0 +1,200 @@
+// Copyright Voxel Plugin SAS, 2026. All Rights Reserved.
+
+#pragma once
+
+#include "VoxelMinimal.isph"
+
+struct FVoxelHeightBulkQuery
+{
+	int2 StartIndex;
+	int2 EndIndex;
+	double2 Start;
+	float Step;
+
+	uniform float* Heights;
+
+	int32 StrideX;
+};
+
+FORCEINLINE varying int32 GetIndex(
+	const uniform FVoxelHeightBulkQuery& Query,
+	const varying int32 X,
+	const uniform int32 Y)
+{
+	check(Query.StartIndex.x <= X && X < Query.EndIndex.x);
+	check(Query.StartIndex.y <= Y && Y < Query.EndIndex.y);
+
+	return X + Query.StrideX * Y;
+}
+FORCEINLINE varying double2 GetPosition(
+	const uniform FVoxelHeightBulkQuery& Query,
+	const varying int32 X,
+	const uniform int32 Y)
+{
+	check(Query.StartIndex.x <= X && X < Query.EndIndex.x);
+	check(Query.StartIndex.y <= Y && Y < Query.EndIndex.y);
+
+	return Query.Start + Query.Step * MakeDouble2(X, Y);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+struct FVoxelVolumeBulkQuery
+{
+	int3 StartIndex;
+	int3 EndIndex;
+	double3 Start;
+	float Step;
+
+	uniform float* Distances;
+
+	int32 StrideX;
+	int32 StrideXY;
+};
+
+FORCEINLINE varying int32 GetIndex(
+	const uniform FVoxelVolumeBulkQuery& Query,
+	const varying int32 X,
+	const uniform int32 Y,
+	const uniform int32 Z)
+{
+	check(Query.StartIndex.x <= X && X < Query.EndIndex.x);
+	check(Query.StartIndex.y <= Y && Y < Query.EndIndex.y);
+	check(Query.StartIndex.z <= Z && Z < Query.EndIndex.z);
+
+	return X + Query.StrideX * Y + Query.StrideXY * Z;
+}
+FORCEINLINE varying double3 GetPosition(
+	const uniform FVoxelVolumeBulkQuery& Query,
+	const varying int32 X,
+	const uniform int32 Y,
+	const uniform int32 Z)
+{
+	check(Query.StartIndex.x <= X && X < Query.EndIndex.x);
+	check(Query.StartIndex.y <= Y && Y < Query.EndIndex.y);
+	check(Query.StartIndex.z <= Z && Z < Query.EndIndex.z);
+
+	return Query.Start + Query.Step * MakeDouble3(X, Y, Z);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+struct FVoxelHeightSparseQuery
+{
+	uniform float* IndirectHeights;
+	int32 Num;
+
+	const uniform double* PositionsX;
+	const uniform double* PositionsY;
+
+	const uniform int32* Indirection;
+};
+
+FORCEINLINE varying float GetHeight(
+	const uniform FVoxelHeightSparseQuery& Query,
+	const varying int32 Index)
+{
+	check(0 <= Index && Index < Query.Num);
+
+	if (Query.Indirection)
+	{
+		IGNORE_PERF_WARNING
+		return Query.IndirectHeights[Query.Indirection[Index]];
+	}
+	else
+	{
+		return Query.IndirectHeights[Index];
+	}
+}
+
+FORCEINLINE void SetHeight(
+	const uniform FVoxelHeightSparseQuery& Query,
+	const varying int32 Index,
+	const varying float NewHeight)
+{
+	check(0 <= Index && Index < Query.Num);
+
+	if (Query.Indirection)
+	{
+		IGNORE_PERF_WARNING
+		Query.IndirectHeights[Query.Indirection[Index]] = NewHeight;
+	}
+	else
+	{
+		Query.IndirectHeights[Index] = NewHeight;
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+struct FVoxelVolumeSparseQuery
+{
+	uniform float* IndirectDistances;
+	int32 Num;
+
+	const uniform double* PositionsX;
+	const uniform double* PositionsY;
+	const uniform double* PositionsZ;
+
+	const uniform int32* Indirection;
+};
+
+FORCEINLINE varying float GetDistance(
+	const uniform FVoxelVolumeSparseQuery& Query,
+	const varying int32 Index)
+{
+	check(0 <= Index && Index < Query.Num);
+
+	if (Query.Indirection)
+	{
+		IGNORE_PERF_WARNING
+		return Query.IndirectDistances[Query.Indirection[Index]];
+	}
+	else
+	{
+		return Query.IndirectDistances[Index];
+	}
+}
+
+FORCEINLINE void SetDistance(
+	const uniform FVoxelVolumeSparseQuery& Query,
+	const varying int32 Index,
+	const varying float NewDistance)
+{
+	check(0 <= Index && Index < Query.Num);
+
+	if (Query.Indirection)
+	{
+		IGNORE_PERF_WARNING
+		Query.IndirectDistances[Query.Indirection[Index]] = NewDistance;
+	}
+	else
+	{
+		Query.IndirectDistances[Index] = NewDistance;
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+enum EVoxelHeightBlendMode
+{
+	HeightBlendMode_Max,
+	HeightBlendMode_Min,
+	HeightBlendMode_Override,
+};
+
+enum EVoxelVolumeBlendMode
+{
+	VolumeBlendMode_Additive,
+	VolumeBlendMode_Subtractive,
+	VolumeBlendMode_Intersect,
+	VolumeBlendMode_Override,
+};

@@ -1,0 +1,77 @@
+// Copyright Voxel Plugin SAS, 2026. All Rights Reserved.
+
+#pragma once
+
+#include "VoxelMinimal.isph"
+
+struct FVoxelFloatBuffer
+{
+	uniform bool bIsConstant;
+	const uniform float* Values;
+};
+
+FORCEINLINE varying float Get(
+	const uniform FVoxelFloatBuffer& Buffer,
+	const varying int32 Index)
+{
+	return Buffer.bIsConstant ? Buffer.Values[0] : Buffer.Values[Index];
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+struct FVoxelDoubleBuffer
+{
+	uniform bool bIsConstant;
+	const uniform double* Values;
+};
+
+FORCEINLINE varying double Get(
+	const uniform FVoxelDoubleBuffer& Buffer,
+	const varying int32 Index)
+{
+	return Buffer.bIsConstant ? Buffer.Values[0] : Buffer.Values[Index];
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+struct FVoxelVectorBuffer
+{
+	uniform FVoxelFloatBuffer X;
+	uniform FVoxelFloatBuffer Y;
+	uniform FVoxelFloatBuffer Z;
+};
+
+FORCEINLINE varying float3 Get(
+	const uniform FVoxelVectorBuffer& Buffer,
+	const varying int32 Index)
+{
+	return MakeFloat3(
+		Get(Buffer.X, Index),
+		Get(Buffer.Y, Index),
+		Get(Buffer.Z, Index));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+struct FVoxelDoubleVectorBuffer
+{
+	uniform FVoxelDoubleBuffer X;
+	uniform FVoxelDoubleBuffer Y;
+	uniform FVoxelDoubleBuffer Z;
+};
+
+FORCEINLINE varying double3 Get(
+	const uniform FVoxelDoubleVectorBuffer& Buffer,
+	const varying int32 Index)
+{
+	return MakeDouble3(
+		Get(Buffer.X, Index),
+		Get(Buffer.Y, Index),
+		Get(Buffer.Z, Index));
+}
