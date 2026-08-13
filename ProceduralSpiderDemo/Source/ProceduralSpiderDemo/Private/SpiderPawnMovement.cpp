@@ -1,5 +1,8 @@
 #include "SpiderPawnMovement.h"
 
+#include "Components/PrimitiveComponent.h"
+#include "Engine/World.h"
+
 USpiderPawnMovement::USpiderPawnMovement()
 {
 	SetIsReplicatedByDefault(true);
@@ -90,16 +93,70 @@ void USpiderPawnMovement::StartDrop()
 
 	bIsDropping = true;
 	bisGrounded = false;
-	StickyForce = 0.0;
 	GravityDir = FVector::DownVector;
+	TargetGravityDir = FVector::DownVector;
 	MovementVelocity = FVector::ZeroVector;
-
+	DetachTimer = 0.0f;
+	bHasSurfaceNormal = false;
 }
+
+bool USpiderPawnMovement::ProbeForAttachedSurface(FHitResult& OutHit) const
+{
+	if (!UpdatedPrimitive || !GetWorld() || SurfaceProbeDistance <= 0.0f)
+	{
+		return false;
+	}
+
+	const FVector ProbeDirection = TargetGravityDir.GetSafeNormal();
+	if (ProbeDirection.IsNearlyZero())
+	{
+		return false;
+	}
+
+	const FVector ProbeStart = UpdatedPrimitive->GetComponentLocation();
+	const FVector ProbeEnd = ProbeStart + ProbeDirection * SurfaceProbeDistance;
+	FComponentQueryParams QueryParams(SCENE_QUERY_STAT(SpiderSurfaceProbe), PawnOwner);
+	QueryParams.bIgnoreTouches = true;
+
+	TArray<FHitResult> Hits;
+	if (!GetWorld()->ComponentSweepMulti(
+		Hits,
+		UpdatedPrimitive,
+		ProbeStart,
+		ProbeEnd,
+		UpdatedPrimitive->GetComponentQuat(),
+		QueryParams))
+	{
+		return false;
+	}
+
+	bool bFoundSurface = false;
+	float BestAlignment = 0.25f;
+	for (const FHitResult& Hit : Hits)
+	{
+		if (!Hit.bBlockingHit)
+		{
+			continue;
+		}
+
+		const FVector HitNormal = Hit.ImpactNormal.IsNearlyZero() ? Hit.Normal : Hit.ImpactNormal;
+		const float Alignment = FVector::DotProduct(HitNormal.GetSafeNormal(), -ProbeDirection);
+		if (Alignment > BestAlignment)
+		{
+			BestAlignment = Alignment;
+			OutHit = Hit;
+			bFoundSurface = true;
+		}
+	}
+
+	return bFoundSurface;
+}
+
 void USpiderPawnMovement::TickClient(float DeltaTime)
 {
 	ConsumeInputVector();
 
-	// Just keep gravity smoothing visually — velocity comes from replication
+	// Just keep gravity smoothing visually - velocity comes from replication
 	GravityDir = FMath::VInterpTo(GravityDir, TargetGravityDir, DeltaTime, GravityTransitionSpeed);
 }
 
@@ -128,13 +185,6 @@ void USpiderPawnMovement::TickServer(float DeltaTime)
 	if (!bisGrounded)
 	{
 		MovementVelocity += GravityDir * GravityAccel * DeltaTime;
-
-		DetachTimer += DeltaTime;
-
-		if (DetachTimer > DetachThreshold)
-		{
-			TargetGravityDir = FVector::DownVector;
-		}
 	}
 	else
 	{
@@ -173,6 +223,7 @@ void USpiderPawnMovement::TickServer(float DeltaTime)
 
 	PawnOwner->SetActorRotation(CurrentCapsuleRotation.Rotator());
 
+	bool bHadSurfaceContact = false;
 	if (!MoveDelta.IsNearlyZero())
 	{
 		FHitResult Hit;
@@ -188,9 +239,11 @@ void USpiderPawnMovement::TickServer(float DeltaTime)
 				{
 					bIsDropping = false;
 					bisGrounded = true;
-					CurrentSurfaceNormal = Hit.Normal;
-					TargetGravityDir = -Hit.Normal;
+					CurrentSurfaceNormal = Hit.ImpactNormal.IsNearlyZero() ? Hit.Normal : Hit.ImpactNormal;
+					TargetGravityDir = -CurrentSurfaceNormal;
 					MovementVelocity = FVector::ZeroVector;
+					DetachTimer = 0.0f;
+					bHadSurfaceContact = true;
 				}
 
 				SlideAlongSurface(MoveDelta, 1.f - Hit.Time, Hit.Normal, Hit);
@@ -200,8 +253,8 @@ void USpiderPawnMovement::TickServer(float DeltaTime)
 
 				if (!bHasSurfaceNormal)
 				{
-					CurrentSurfaceNormal = Hit.Normal;
-					TargetGravityDir = -Hit.Normal;
+					CurrentSurfaceNormal = Hit.ImpactNormal.IsNearlyZero() ? Hit.Normal : Hit.ImpactNormal;
+					TargetGravityDir = -CurrentSurfaceNormal;
 				}
 
 				MovementVelocity = FVector::ZeroVector;
@@ -214,17 +267,43 @@ void USpiderPawnMovement::TickServer(float DeltaTime)
 
 				bisGrounded = true;
 				DetachTimer = 0.0f;
+				bHadSurfaceContact = true;
 				SlideAlongSurface(MoveDelta, 1.f - Hit.Time, Hit.Normal, Hit);
 
 
 			}
 		}
-		else
+	}
+
+	if (!bIsDropping && !bHadSurfaceContact && bisGrounded)
+	{
+		FHitResult ProbeHit;
+		if (ProbeForAttachedSurface(ProbeHit))
 		{
-			if (!bIsDropping)
-				bisGrounded = false;
+			if (!bHasSurfaceNormal)
+			{
+				CurrentSurfaceNormal = ProbeHit.ImpactNormal.IsNearlyZero() ? ProbeHit.Normal : ProbeHit.ImpactNormal;
+				CurrentSurfaceNormal.Normalize();
+				TargetGravityDir = -CurrentSurfaceNormal;
+			}
+
+			MovementVelocity = FVector::ZeroVector;
+			DetachTimer = 0.0f;
+			bHadSurfaceContact = true;
 		}
 	}
+
+	if (!bIsDropping && !bHadSurfaceContact && bisGrounded)
+	{
+		DetachTimer += DeltaTime;
+		if (DetachTimer >= DetachThreshold)
+		{
+			bisGrounded = false;
+			TargetGravityDir = FVector::DownVector;
+			MovementVelocity = FVector::ZeroVector;
+		}
+	}
+
 	bHasSurfaceNormal = false;
 }
 

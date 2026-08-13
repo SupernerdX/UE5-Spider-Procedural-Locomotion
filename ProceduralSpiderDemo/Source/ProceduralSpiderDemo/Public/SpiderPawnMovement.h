@@ -1,5 +1,3 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -7,10 +5,6 @@
 #include "Net/UnrealNetwork.h"
 #include "SpiderEnums.h"
 #include "SpiderPawnMovement.generated.h"
-
-/**
- * 
- */
 
 
 UCLASS(meta = (BlueprintSpawnableComponent))
@@ -21,8 +15,8 @@ class PROCEDURALSPIDERDEMO_API USpiderPawnMovement : public UPawnMovementCompone
 public:
 	USpiderPawnMovement();
 
-	virtual void TickComponent(float DeltaTime, enum ELevelTick tickType, FActorComponentTickFunction *thisTickFunction) override;
-	
+	virtual void TickComponent(float DeltaTime, enum ELevelTick tickType, FActorComponentTickFunction* thisTickFunction) override;
+
 	virtual void RequestDirectMove(const FVector& MoveVelocity, bool bForceMaxSpeed) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -49,9 +43,9 @@ public:
 	FVector GravityDir = FVector::DownVector;
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Spider Movement")
-	ESpiderSurfaceState SurfaceState = ESpiderSurfaceState::Grounded; 
+	ESpiderSurfaceState SurfaceState = ESpiderSurfaceState::Grounded;
 
-	// ─── Tweakable in Blueprint/Editor ──────────────────────────────────────
+	// Tweakable in Blueprint/Editor
 
 	UPROPERTY(BlueprintReadWrite, Replicated, Category = "Spider Movement")
 	FVector MovementVelocity = FVector::ZeroVector;
@@ -78,6 +72,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spider Movement")
 	float DetachThreshold = 0.2f;
 
+	// Distance to sweep the collision component toward the remembered surface.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spider Movement", meta = (ClampMin = "0.0", Units = "cm"))
+	float SurfaceProbeDistance = 12.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Spider Movement")
 	float MaxMovementSpeed = 600.f;
 
@@ -85,22 +83,17 @@ public:
 	float GravityAccel = 980.0f;
 
 
-private: 
-	FVector TargetGravityDir = FVector::DownVector; 
-	FVector LastSurfaceNormal = FVector::UpVector; 
+private:
+	FVector TargetGravityDir = FVector::DownVector;
+	FVector LastSurfaceNormal = FVector::UpVector;
 	FQuat CurrentCapsuleRotation = FQuat::Identity;
-	
+
 	float DetachTimer = 0.0f;
 
 	bool bHasSurfaceNormal = false;
 	bool bMovementPaused = false;
+	bool ProbeForAttachedSurface(FHitResult& OutHit) const;
 	void TickServer(float DeltaTime);
 	void TickClient(float DeltaTime);
-	
-	
 
-
-
-
-	
 };

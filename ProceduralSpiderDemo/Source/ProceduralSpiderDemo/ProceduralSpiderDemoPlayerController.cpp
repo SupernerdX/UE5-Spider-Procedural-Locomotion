@@ -27,7 +27,7 @@ void AProceduralSpiderDemoPlayerController::BeginPlay()
 		// spawn the mobile controls widget
 		MobileControlsWidget = CreateWidget<UUserWidget>(this, MobileControlsWidgetClass);
 
-		if (MobileControlsWidget)
+		if (MobileControlsWidget != nullptr)
 		{
 			// add the controls to the player screen
 			MobileControlsWidget->AddToPlayerScreen(0);

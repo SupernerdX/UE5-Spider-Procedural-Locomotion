@@ -1,5 +1,8 @@
 #pragma once
 
+#include "CoreMinimal.h"
+#include "SpiderEnums.generated.h"
+
 UENUM(BlueprintType)
 enum class ESpiderSurfaceState : uint8
 {

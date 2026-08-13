@@ -1,0 +1,9 @@
+/.vs
+/.vscode
+/Content
+/DerivedDataCache
+/Intermediate
+/Saved
+/Plugins/Voxel/Content
+/Plugins/Voxel/Intermediate
+/Plugins/Voxel/Shaders

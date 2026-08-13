@@ -212,7 +212,14 @@ FDelayedAutoRegisterHelper GVoxelRunOnStartup_Game(EDelayedRegisterRunPhase::Obj
 
 		if (WITH_EDITOR)
 		{
-			FVoxelRunOnStartupStatics::Get().EditorCommandletFunctions.Execute();
+			// Most commandlets do not need Voxel's editor-commandlet startup work.
+			// Keep it opt-in so unrelated package repair passes can run without
+			// tripping Voxel shader-hook initialization at startup.
+			if (!IsRunningCommandlet() ||
+				FParse::Param(FCommandLine::Get(), TEXT("VoxelEnableEditorCommandletStartup")))
+			{
+				FVoxelRunOnStartupStatics::Get().EditorCommandletFunctions.Execute();
+			}
 		}
 	});
 });

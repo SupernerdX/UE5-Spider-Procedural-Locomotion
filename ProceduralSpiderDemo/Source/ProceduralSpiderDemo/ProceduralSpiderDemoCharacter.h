@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Logging/LogMacros.h"
+#include "Components/PrimitiveComponent.h"
 #include "ProceduralSpiderDemoCharacter.generated.h"
 
 class UInputComponent;
@@ -89,6 +89,26 @@ public:
 
 	/** Returns first person camera component **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+
+	virtual void SetBase(UPrimitiveComponent* NewBase, const FName BoneName, const bool bNotifyActor) override
+	{
+		if (NewBase)
+		{
+			// LoadClass to not depend on the voxel module
+			static UClass* const VoxelWorldClass = LoadClass<UObject>(nullptr, TEXT("/Script/Voxel.VoxelWorld"));
+
+			const AActor* BaseOwner = NewBase->GetOwner();
+			if (ensure(VoxelWorldClass) &&
+				BaseOwner &&
+				BaseOwner->IsA(VoxelWorldClass))
+			{
+				NewBase = Cast<UPrimitiveComponent>(BaseOwner->GetRootComponent());
+				ensure(NewBase);
+			}
+		}
+
+		Super::SetBase(NewBase, BoneName, bNotifyActor);
+	}
 
 };
 
