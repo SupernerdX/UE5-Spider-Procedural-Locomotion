@@ -2,11 +2,49 @@
 
 #include "Components/PrimitiveComponent.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
+#include "ProceduralSpiderDemo.h"
+#include "VoxelWorld.h"
 
 USpiderPawnMovement::USpiderPawnMovement()
 {
 	SetIsReplicatedByDefault(true);
 	PrimaryComponentTick.bCanEverTick = true;
+}
+
+void USpiderPawnMovement::BeginPlay()
+{
+	Super::BeginPlay();
+
+	RefreshTrackedVoxelWorlds();
+
+	USceneComponent* OrientationComponent = UpdatedComponent;
+	if (OrientationComponent == nullptr && PawnOwner)
+	{
+		OrientationComponent = PawnOwner->GetRootComponent();
+	}
+
+	if (OrientationComponent)
+	{
+		CurrentCapsuleRotation = OrientationComponent->GetComponentQuat();
+		CurrentCapsuleRotation.Normalize();
+
+		// Seed the movement frame from the placed capsule orientation so any
+		// startup traces using CurrentSurfaceNormal align with wall-mounted spiders.
+		const FVector InitialSurfaceNormal = CurrentCapsuleRotation.GetUpVector().GetSafeNormal();
+		if (!InitialSurfaceNormal.IsNearlyZero())
+		{
+			CurrentSurfaceNormal = InitialSurfaceNormal;
+			LastSurfaceNormal = InitialSurfaceNormal;
+			TargetGravityDir = -InitialSurfaceNormal;
+			GravityDir = TargetGravityDir;
+		}
+	}
+
+	bStartupSurfaceLockReleased =
+		StartupSurfaceLockDuration <= 0.0f &&
+		!bWaitForVoxelWorldOnStartup &&
+		!bWaitForInitialSurfaceNormalOnStartup;
 }
 
 void USpiderPawnMovement::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -66,8 +104,87 @@ void USpiderPawnMovement::SetSurfaceNormal(FVector NewNormal)
 		CurrentSurfaceNormal = NewNormal.GetSafeNormal();
 		TargetGravityDir = -CurrentSurfaceNormal;
 		bHasSurfaceNormal = true;
+		bHasReceivedInitialSurfaceNormal = true;
 	}
 }
+
+void USpiderPawnMovement::RefreshTrackedVoxelWorlds()
+{
+	TrackedVoxelWorlds.Reset();
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	for (TActorIterator<AVoxelWorld> It(World); It; ++It)
+	{
+		TrackedVoxelWorlds.Add(*It);
+	}
+}
+
+bool USpiderPawnMovement::AreTrackedVoxelWorldsReady() const
+{
+	for (const TWeakObjectPtr<AVoxelWorld>& VoxelWorld : TrackedVoxelWorlds)
+	{
+		if (VoxelWorld.IsValid() && !VoxelWorld->IsVoxelWorldReady())
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool USpiderPawnMovement::ShouldHoldForStartup(float DeltaTime)
+{
+	if (bStartupSurfaceLockReleased)
+	{
+		return false;
+	}
+
+	if (bIsDropping)
+	{
+		bStartupSurfaceLockReleased = true;
+		return false;
+	}
+
+	StartupSurfaceLockElapsed += DeltaTime;
+
+	if (bWaitForVoxelWorldOnStartup && TrackedVoxelWorlds.IsEmpty())
+	{
+		RefreshTrackedVoxelWorlds();
+	}
+
+	const bool bWithinMinimumHold = StartupSurfaceLockElapsed < StartupSurfaceLockDuration;
+	const bool bTimedOut = MaxStartupSurfaceLockTime > 0.0f && StartupSurfaceLockElapsed >= MaxStartupSurfaceLockTime;
+	const bool bWaitingForVoxelWorld = bWaitForVoxelWorldOnStartup && !TrackedVoxelWorlds.IsEmpty() && !AreTrackedVoxelWorldsReady();
+	const bool bWaitingForInitialSurface = bWaitForInitialSurfaceNormalOnStartup && !bHasReceivedInitialSurfaceNormal;
+
+	if (bWithinMinimumHold || (!bTimedOut && (bWaitingForVoxelWorld || bWaitingForInitialSurface)))
+	{
+		return true;
+	}
+
+	if (bTimedOut && (bWaitingForVoxelWorld || bWaitingForInitialSurface) && !bLoggedStartupSurfaceLockTimeout)
+	{
+		UE_LOG(
+			LogProceduralSpiderDemo,
+			Warning,
+			TEXT("Spider pawn '%s' released startup surface lock after %.2fs before all startup conditions were ready. WaitingForVoxelWorld=%s WaitingForSurfaceNormal=%s"),
+			*GetNameSafe(GetOwner()),
+			StartupSurfaceLockElapsed,
+			bWaitingForVoxelWorld ? TEXT("true") : TEXT("false"),
+			bWaitingForInitialSurface ? TEXT("true") : TEXT("false"));
+
+		bLoggedStartupSurfaceLockTimeout = true;
+	}
+
+	bStartupSurfaceLockReleased = true;
+	return false;
+}
+
 void USpiderPawnMovement::SetMoveDirection(FVector WorldDirection)
 {
 	if (!PawnOwner || !PawnOwner->HasAuthority() || bMovementPaused)
@@ -91,6 +208,7 @@ void USpiderPawnMovement::StartDrop()
 		return;
 	}
 
+	bStartupSurfaceLockReleased = true;
 	bIsDropping = true;
 	bisGrounded = false;
 	GravityDir = FVector::DownVector;
@@ -168,6 +286,15 @@ void USpiderPawnMovement::TickServer(float DeltaTime)
 		return;
 	}
 
+	if (ShouldHoldForStartup(DeltaTime))
+	{
+		ConsumeInputVector();
+		MovementVelocity = FVector::ZeroVector;
+		DetachTimer = 0.0f;
+		bisGrounded = true;
+		bHasSurfaceNormal = false;
+		return;
+	}
 
 	GravityDir = FMath::VInterpTo(GravityDir, TargetGravityDir, DeltaTime, GravityTransitionSpeed);
 
@@ -243,6 +370,7 @@ void USpiderPawnMovement::TickServer(float DeltaTime)
 					TargetGravityDir = -CurrentSurfaceNormal;
 					MovementVelocity = FVector::ZeroVector;
 					DetachTimer = 0.0f;
+					bHasReceivedInitialSurfaceNormal = true;
 					bHadSurfaceContact = true;
 				}
 
@@ -255,6 +383,7 @@ void USpiderPawnMovement::TickServer(float DeltaTime)
 				{
 					CurrentSurfaceNormal = Hit.ImpactNormal.IsNearlyZero() ? Hit.Normal : Hit.ImpactNormal;
 					TargetGravityDir = -CurrentSurfaceNormal;
+					bHasReceivedInitialSurfaceNormal = true;
 				}
 
 				MovementVelocity = FVector::ZeroVector;
@@ -285,6 +414,7 @@ void USpiderPawnMovement::TickServer(float DeltaTime)
 				CurrentSurfaceNormal = ProbeHit.ImpactNormal.IsNearlyZero() ? ProbeHit.Normal : ProbeHit.ImpactNormal;
 				CurrentSurfaceNormal.Normalize();
 				TargetGravityDir = -CurrentSurfaceNormal;
+				bHasReceivedInitialSurfaceNormal = true;
 			}
 
 			MovementVelocity = FVector::ZeroVector;

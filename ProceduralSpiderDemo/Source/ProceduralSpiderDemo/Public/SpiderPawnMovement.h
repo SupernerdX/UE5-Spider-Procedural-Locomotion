@@ -6,6 +6,7 @@
 #include "SpiderEnums.h"
 #include "SpiderPawnMovement.generated.h"
 
+class AVoxelWorld;
 
 UCLASS(meta = (BlueprintSpawnableComponent))
 class PROCEDURALSPIDERDEMO_API USpiderPawnMovement : public UPawnMovementComponent
@@ -15,6 +16,7 @@ class PROCEDURALSPIDERDEMO_API USpiderPawnMovement : public UPawnMovementCompone
 public:
 	USpiderPawnMovement();
 
+	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick tickType, FActorComponentTickFunction* thisTickFunction) override;
 
 	virtual void RequestDirectMove(const FVector& MoveVelocity, bool bForceMaxSpeed) override;
@@ -82,6 +84,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spider Movement")
 	float GravityAccel = 980.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spider Movement|Startup", meta = (ClampMin = "0.0", Units = "s"))
+	float StartupSurfaceLockDuration = 0.1f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spider Movement|Startup")
+	bool bWaitForVoxelWorldOnStartup = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spider Movement|Startup")
+	bool bWaitForInitialSurfaceNormalOnStartup = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spider Movement|Startup", meta = (ClampMin = "0.0", Units = "s"))
+	float MaxStartupSurfaceLockTime = 2.0f;
+
 
 private:
 	FVector TargetGravityDir = FVector::DownVector;
@@ -89,10 +103,20 @@ private:
 	FQuat CurrentCapsuleRotation = FQuat::Identity;
 
 	float DetachTimer = 0.0f;
+	float StartupSurfaceLockElapsed = 0.0f;
 
 	bool bHasSurfaceNormal = false;
 	bool bMovementPaused = false;
+	bool bHasReceivedInitialSurfaceNormal = false;
+	bool bStartupSurfaceLockReleased = false;
+	bool bLoggedStartupSurfaceLockTimeout = false;
+
+	TArray<TWeakObjectPtr<AVoxelWorld>> TrackedVoxelWorlds;
+
 	bool ProbeForAttachedSurface(FHitResult& OutHit) const;
+	void RefreshTrackedVoxelWorlds();
+	bool AreTrackedVoxelWorldsReady() const;
+	bool ShouldHoldForStartup(float DeltaTime);
 	void TickServer(float DeltaTime);
 	void TickClient(float DeltaTime);
 
